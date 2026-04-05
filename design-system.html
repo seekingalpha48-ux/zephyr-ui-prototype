@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zephyr Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="design-tokens.css" />
+  <style>
+    /* ===========================
+       PAGE LAYOUT
+    =========================== */
+    html { scroll-behavior: smooth; }
+
+    body {
+      display: flex;
+      min-height: 100vh;
+      background: var(--color-bg-page);
+    }
+
+    /* Sidebar nav */
+    .ds-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 240px;
+      height: 100vh;
+      background: var(--color-white);
+      border-right: 1px solid var(--color-border);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      z-index: var(--z-sticky);
+    }
+
+    .ds-nav__header {
+      padding: var(--space-5) var(--space-5) var(--space-4);
+      border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+
+    .ds-nav__logo {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      text-decoration: none;
+      margin-bottom: var(--space-1);
+    }
+
+    .ds-nav__logo-mark {
+      width: 32px;
+      height: 32px;
+      background: var(--color-primary-600);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-white);
+      font-weight: var(--font-weight-bold);
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .ds-nav__brand {
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+    }
+
+    .ds-nav__version {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-secondary);
+      margin-left: 35px;
+    }
+
+    .ds-nav__section {
+      padding: var(--space-4) var(--space-5) var(--space-2);
+    }
+
+    .ds-nav__group-label {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: var(--space-1);
+    }
+
+    .ds-nav__link {
+      display: block;
+      padding: 5px var(--space-3);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      transition: background var(--transition-fast), color var(--transition-fast);
+      margin-bottom: 1px;
+    }
+
+    .ds-nav__link:hover,
+    .ds-nav__link.active {
+      background: var(--color-primary-50);
+      color: var(--color-primary-700);
+    }
+
+    .ds-nav__footer {
+      margin-top: auto;
+      padding: var(--space-4) var(--space-5);
+      border-top: 1px solid var(--color-border);
+    }
+
+    /* Main content */
+    .ds-main {
+      margin-left: 240px;
+      flex: 1;
+      padding: var(--space-12) var(--space-12) var(--space-20);
+      max-width: calc(100% - 240px);
+    }
+
+    .ds-hero {
+      margin-bottom: var(--space-16);
+      padding-bottom: var(--space-10);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .ds-hero__eyebrow {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-primary-600);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: var(--space-3);
+    }
+
+    .ds-hero__title {
+      font-size: 48px;
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-primary);
+      line-height: 1.1;
+      margin-bottom: var(--space-4);
+    }
+
+    .ds-hero__desc {
+      font-size: var(--font-size-lg);
+      color: var(--color-text-secondary);
+      line-height: var(--line-height-relaxed);
+      max-width: 640px;
+      margin-bottom: var(--space-6);
+    }
+
+    .ds-hero__links {
+      display: flex;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+
+    /* Section layout */
+    .ds-section {
+      margin-bottom: var(--space-20);
+    }
+
+    .ds-section__header {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+      padding-bottom: var(--space-4);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .ds-section__title {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-primary);
+    }
+
+    .ds-section__subtitle {
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+    }
+
+    /* Component block */
+    .ds-block {
+      margin-bottom: var(--space-8);
+    }
+
+    .ds-block__label {
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+      margin-bottom: var(--space-2);
+    }
+
+    .ds-block__desc {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-3);
+    }
+
+    /* Preview + code panel */
+    .ds-component {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--color-white);
+    }
+
+    .ds-component__preview {
+      padding: var(--space-8) var(--space-6);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+      align-items: center;
+      min-height: 80px;
+    }
+
+    .ds-component__preview--centered {
+      justify-content: center;
+    }
+
+    .ds-component__preview--tall {
+      padding: var(--space-10) var(--space-6);
+    }
+
+    .ds-component__divider {
+      border: none;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .ds-component__code-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-2) var(--space-4);
+      background: var(--color-neutral-900);
+    }
+
+    .ds-component__code-lang {
+      font-size: var(--font-size-xs);
+      font-family: var(--font-family-mono);
+      color: var(--color-neutral-400);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: 3px var(--space-2);
+      border-radius: var(--radius-sm);
+      background: var(--color-neutral-700);
+      color: var(--color-neutral-300);
+      font-size: var(--font-size-xs);
+      font-family: var(--font-family-mono);
+      border: none;
+      cursor: pointer;
+      transition: background var(--transition-fast), color var(--transition-fast);
+    }
+
+    .copy-btn:hover { background: var(--color-neutral-600); color: var(--color-white); }
+    .copy-btn.copied { background: var(--color-success-700); color: var(--color-white); }
+
+    .ds-component__code {
+      background: var(--color-neutral-900);
+      color: #E2E8F0;
+      padding: var(--space-4) var(--space-5);
+      font-family: var(--font-family-mono);
+      font-size: 13px;
+      line-height: 1.7;
+      overflow-x: auto;
+      margin: 0;
+      white-space: pre;
+    }
+
+    .code-tag    { color: #7DD3FC; }
+    .code-attr   { color: #86EFAC; }
+    .code-val    { color: #FCA5A5; }
+    .code-comment{ color: #6B7280; font-style: italic; }
+    .code-prop   { color: #C4B5FD; }
+    .code-str    { color: #FCD34D; }
+
+    /* ===========================
+       COLOR PALETTE
+    =========================== */
+    .ds-color-family {
+      margin-bottom: var(--space-6);
+    }
+
+    .ds-color-family__name {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: var(--space-3);
+    }
+
+    .ds-color-scale {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: var(--space-2);
+    }
+
+    .ds-swatch {
+      cursor: pointer;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid rgba(0,0,0,0.06);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .ds-swatch:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+    .ds-swatch__color {
+      height: 56px;
+    }
+
+    .ds-swatch__info {
+      padding: 4px var(--space-2) var(--space-2);
+      background: var(--color-white);
+    }
+
+    .ds-swatch__step {
+      font-size: 11px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+    }
+
+    .ds-swatch__hex {
+      font-size: 10px;
+      font-family: var(--font-family-mono);
+      color: var(--color-text-secondary);
+    }
+
+    .ds-swatch__var {
+      font-size: 9px;
+      font-family: var(--font-family-mono);
+      color: var(--color-text-secondary);
+      margin-top: 1px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Semantic aliases table */
+    .ds-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--font-size-sm);
+    }
+
+    .ds-table th {
+      text-align: left;
+      padding: var(--space-2) var(--space-4);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-neutral-50);
+    }
+
+    .ds-table td {
+      padding: 10px var(--space-4);
+      border-bottom: 1px solid var(--color-border);
+      vertical-align: middle;
+    }
+
+    .ds-table tr:last-child td { border-bottom: none; }
+    .ds-table tr:hover td { background: var(--color-neutral-50); }
+
+    .ds-table__swatch {
+      width: 20px;
+      height: 20px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(0,0,0,0.08);
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: var(--space-2);
+    }
+
+    code {
+      font-family: var(--font-family-mono);
+      font-size: 12px;
+      background: var(--color-neutral-100);
+      color: var(--color-primary-700);
+      padding: 1px 5px;
+      border-radius: var(--radius-sm);
+    }
+
+    /* ===========================
+       TYPOGRAPHY
+    =========================== */
+    .ds-type-row {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-6);
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .ds-type-row:last-child { border-bottom: none; }
+
+    .ds-type-row__sample {
+      flex: 1;
+    }
+
+    .ds-type-row__meta {
+      font-size: var(--font-size-sm);
+      font-family: var(--font-family-mono);
+      color: var(--color-text-secondary);
+      white-space: nowrap;
+      min-width: 220px;
+    }
+
+    /* ===========================
+       SPACING
+    =========================== */
+    .ds-spacing-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .ds-spacing-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+    }
+
+    .ds-spacing-bar-wrap {
+      flex: 1;
+      height: 24px;
+      display: flex;
+      align-items: center;
+    }
+
+    .ds-spacing-bar {
+      height: 12px;
+      background: var(--color-primary-200);
+      border-radius: var(--radius-sm);
+      border-right: 2px solid var(--color-primary-500);
+    }
+
+    .ds-spacing-name {
+      font-family: var(--font-family-mono);
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      width: 100px;
+    }
+
+    .ds-spacing-val {
+      font-family: var(--font-family-mono);
+      font-size: 12px;
+      color: var(--color-text-primary);
+      width: 40px;
+    }
+
+    /* ===========================
+       SHADOWS
+    =========================== */
+    .ds-shadows-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: var(--space-6);
+    }
+
+    .ds-shadow-card {
+      background: var(--color-white);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-8) var(--space-4);
+      gap: var(--space-3);
+    }
+
+    .ds-shadow-card__name {
+      font-family: var(--font-family-mono);
+      font-size: 12px;
+      color: var(--color-text-secondary);
+    }
+
+    /* ===========================
+       RADIUS
+    =========================== */
+    .ds-radius-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-6);
+      align-items: flex-end;
+    }
+
+    .ds-radius-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .ds-radius-demo {
+      width: 64px;
+      height: 64px;
+      background: var(--color-primary-100);
+      border: 2px solid var(--color-primary-400);
+    }
+
+    .ds-radius-label {
+      font-family: var(--font-family-mono);
+      font-size: 11px;
+      color: var(--color-text-secondary);
+      text-align: center;
+    }
+
+    /* ===========================
+       TOAST DEMO
+    =========================== */
+    .ds-toast {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-lg);
+      background: var(--color-white);
+      box-shadow: var(--shadow-lg);
+      max-width: 360px;
+      border-left: 3px solid;
+    }
+    .ds-toast--success { border-left-color: var(--color-success-500); }
+    .ds-toast--warning { border-left-color: var(--color-warning-500); }
+    .ds-toast--danger  { border-left-color: var(--color-danger-500); }
+    .ds-toast--info    { border-left-color: var(--color-primary-500); }
+
+    .ds-toast__icon {
+      font-size: 16px;
+      line-height: 1.4;
+      flex-shrink: 0;
+    }
+
+    .ds-toast__body { flex: 1; }
+    .ds-toast__title { font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
+    .ds-toast__msg   { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-top: 2px; }
+
+    /* ===========================
+       UTILITIES
+    =========================== */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      background: var(--color-neutral-100);
+      color: var(--color-neutral-700);
+    }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); }
+    .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-4); }
+
+    @media (max-width: 1024px) {
+      .two-col, .three-col { grid-template-columns: 1fr; }
+    }
+
+    /* Scrollbar */
+    .ds-nav::-webkit-scrollbar { width: 4px; }
+    .ds-nav::-webkit-scrollbar-track { background: transparent; }
+    .ds-nav::-webkit-scrollbar-thumb { background: var(--color-neutral-200); border-radius: 9999px; }
+
+    /* Active nav highlight via JS */
+    .ds-nav__link.is-active {
+      background: var(--color-primary-50);
+      color: var(--color-primary-700);
+      font-weight: var(--font-weight-semibold);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================
+     SIDEBAR NAV
+============================= -->
+<nav class="ds-nav">
+  <div class="ds-nav__header">
+    <a href="#" class="ds-nav__logo">
+      <div class="ds-nav__logo-mark">Z</div>
+      <span class="ds-nav__brand">Zephyr DS</span>
+    </a>
+    <div class="ds-nav__version">Calm Power · v1.0</div>
+  </div>
+
+  <div class="ds-nav__section">
+    <div class="ds-nav__group-label">Overview</div>
+    <a href="#intro"       class="ds-nav__link">Introduction</a>
+    <a href="#getting-started" class="ds-nav__link">Getting Started</a>
+  </div>
+
+  <div class="ds-nav__section">
+    <div class="ds-nav__group-label">Foundations</div>
+    <a href="#colors"      class="ds-nav__link">Colors</a>
+    <a href="#typography"  class="ds-nav__link">Typography</a>
+    <a href="#spacing"     class="ds-nav__link">Spacing</a>
+    <a href="#radius"      class="ds-nav__link">Border Radius</a>
+    <a href="#shadows"     class="ds-nav__link">Shadows</a>
+  </div>
+
+  <div class="ds-nav__section">
+    <div class="ds-nav__group-label">Components</div>
+    <a href="#buttons"     class="ds-nav__link">Buttons</a>
+    <a href="#badges"      class="ds-nav__link">Badges</a>
+    <a href="#inputs"      class="ds-nav__link">Inputs</a>
+    <a href="#cards"       class="ds-nav__link">Cards</a>
+    <a href="#avatars"     class="ds-nav__link">Avatars</a>
+    <a href="#toasts"      class="ds-nav__link">Toasts</a>
+  </div>
+
+  <div class="ds-nav__section">
+    <div class="ds-nav__group-label">Screens</div>
+    <a href="dashboard.html"     class="ds-nav__link">↗ Dashboard</a>
+    <a href="contacts.html"      class="ds-nav__link">↗ Contacts</a>
+    <a href="invoices.html"      class="ds-nav__link">↗ Invoices</a>
+    <a href="pipeline.html"      class="ds-nav__link">↗ Pipeline</a>
+    <a href="invoice-create.html" class="ds-nav__link">↗ Invoice Create</a>
+  </div>
+
+  <div class="ds-nav__footer">
+    <div style="font-size:var(--font-size-xs);color:var(--color-text-secondary);">
+      Source: <code style="font-size:10px;">design-tokens.css</code>
+    </div>
+  </div>
+</nav>
+
+<!-- ============================
+     MAIN CONTENT
+============================= -->
+<main class="ds-main">
+
+  <!-- HERO -->
+  <section class="ds-hero" id="intro">
+    <div class="ds-hero__eyebrow">Design System</div>
+    <h1 class="ds-hero__title">Zephyr<br>Calm Power</h1>
+    <p class="ds-hero__desc">
+      A clean, accessible component library for the Zephyr operating platform.
+      All tokens live in <code>design-tokens.css</code> — import it once and use CSS custom properties or utility classes across every screen.
+    </p>
+    <div class="ds-hero__links">
+      <a href="index.html" class="btn btn--primary">View Prototypes</a>
+      <a href="design-tokens.css" class="btn btn--secondary" download>Download Tokens</a>
+    </div>
+  </section>
+
+  <!-- GETTING STARTED -->
+  <section class="ds-section" id="getting-started">
+    <div class="ds-section__header">
+      <h2 class="ds-section__title">Getting Started</h2>
+      <span class="ds-section__subtitle">One import, full system</span>
+    </div>
+
+    <p style="color:var(--color-text-secondary);font-size:var(--font-size-md);margin-bottom:var(--space-5);line-height:var(--line-height-relaxed);">
+      Import the token file once in your HTML or CSS. All CSS custom properties and utility classes become available globally.
+    </p>
+
+    <div class="ds-component">
+      <div class="ds-component__code-bar">
+        <span class="ds-component__code-lang">HTML</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre class="ds-component__code">&lt;<span class="code-tag">link</span> <span class="code-attr">rel</span>=<span class="code-val">"stylesheet"</span> <span class="code-attr">href</span>=<span class="code-val">"design-tokens.css"</span> /&gt;
+
+<span class="code-comment">&lt;!-- Google Fonts (Inter + JetBrains Mono) --&gt;</span>
+&lt;<span class="code-tag">link</span> <span class="code-attr">href</span>=<span class="code-val">"https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap"</span> <span class="code-attr">rel</span>=<span class="code-val">"stylesheet"</span> /&gt;</pre>
+    </div>
+
+    <div style="margin-top:var(--space-6);">
+      <div class="ds-block__label">Use tokens in your CSS</div>
+      <div class="ds-component">
+        <div class="ds-component__code-bar">
+          <span class="ds-component__code-lang">CSS</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre class="ds-component__code"><span class="code-comment">/* Use any CSS custom property directly */</span>
+<span class="code-prop">.my-card</span> {
+  background: <span class="code-str">var(--color-bg-card)</span>;
+  border: 1px solid <span class="code-str">var(--color-border)</span>;
+  border-radius: <span class="code-str">var(--radius-lg)</span>;
+  padding: <span class="code-str">var(--space-6)</span>;
+  box-shadow: <span class="code-str">var(--shadow-sm)</span>;
+}
+
+<span class="code-prop">.my-heading</span> {
+  font-size: <span class="code-str">var(--font-size-xl)</span>;
+  font-weight: <span class="code-str">var(--font-weight-semibold)</span>;
+  color: <span class="code-str">var(--color-text-primary)</span>;
+}</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- COLORS -->
+  <section class="ds-section" id="colors">
+    <div class="ds-section__header">
+      <h2 class="ds-section__title">Colors</h2>
+      <span class="ds-section__subtitle">Click any swatch to copy the hex value</span>
+    </div>
+
+    <!-- Primary -->
+    <div class="ds-color-family">
+      <div class="ds-color-family__name">Primary — Indigo</div>
+      <div class="ds-color-scale">
+        <div class="ds-swatch" onclick="copyText('#EEF2FF', this)" title="Copy #EEF2FF">
+          <div class="ds-swatch__color" style="background:#EEF2FF;"></div>
+          <div class="ds-swatch__info"><div class="ds-swatch__step">50</div><div class="ds-swatch__hex">#EEF2FF</div><div class="ds-swatch__var">--color-primary-50</div></div>
+        </div>
+        <div class="ds-swatch" onclick="copyText('#E0E7FF', this)" title="Copy #E0E7FF">
+          <div class="ds-swatch__color" style="background:#E0E7FF;"></div>
+          <div class="ds-swatch__info"><div class="ds-swatch__step">100</div><div class="ds-swatch__hex">#E0E7FF</div><div class="ds-swatch__var">--color-primary-100</div></div>
+        </div>
+        <div class="ds-swatch" onclick="copyText('#C7D2FE', this)" title="Copy #C7D2FE">
+          <div class="ds-swatch__color" style="background:#C7D2FE;"></div>
+          <div class="ds-swatch__info"><div class="ds-swatch__step">200</div><div class="ds-swatch__hex">#C7D2FE</div><div class="ds-swatch__var">--color-primary-200</div></div>
+        </div>
+        <div class="ds-swatch" onclick="copyText('#A5B4FC', this)" title="Copy #A5B4FC">
+          <div class="ds-swatch__color" style="background:#A5B4FC;"></div>
+          <div class="ds-swatch__info"><div class="ds-swatch__step">300</div><div class="ds-swatch__hex">#A5B4FC</div><div class="ds-swatch__var">--color-primary-300</div></div>
+        </div>
+        <div class="ds-swatch" onclick="copyText('#818CF8', this)" title="Copy #818CF8">
+          <div class="ds-swatch__color" style="background:#818CF8;"></div>
+          <div class="ds-swatch__info"><div class="ds-swatch__step">400</div><div class="ds-swatch__hex">#818CF8</div><div class="ds-swatch__var">--color-primary-400</div></div>
+        </div>
+        <div class="ds-swatch" onclick="copyText('#6366F1', this)" title="Copy #6366F1">
+          <div class="ds-swatch__color" style="background:#6366F1;"></div>
+          <div class="ds-swatch__info"><div class="ds-swatch__step">500</div><div class="ds-swatch__hex">#6366F1</div><div class="ds-swatch__var">--color-primary-500</div></div>
+        </div>
+        <div class="ds-swatch" onclick="copyText('#4F46E5', this)" title="Copy #4F46E5" style="box-shadow:0 0 0 2px var(--color-primary-600);">
+          <div class="ds-swatch__color" style="background:#4F46E5;"></div>
+          <div class="ds-swatch__info"><div class="ds-swatch__step">600 ★</div><div class="ds-swatch__hex">#4F46E5</div><div class="ds-swatch__var">--color-primary-600</div></div>
+        </div>
+        <div class="ds-swatch" onclick="copyText('#4338CA', this)" title="Copy #4338CA">
+          <div class="ds-swatch__color" style="background:#4338CA;"></div>
+          <div class="ds-swatch__info"><div class="ds-swatch__step">700</div><div class="ds-swatch__hex">#4338CA</div><div class="ds-swatch__var">--color-primary-700</div></div>
+        </div>
+        <div class="ds-swatch" onclick="copyText('#3730A3', this)" title="Copy #3730A3">
+          <div class="ds-swatch__color" style="background:#3730A3;"></div>
+          <div class="ds-swatch__info"><div class="ds-swatch__step">800</div><div class="ds-swatch__hex">#3730A3</div><div class="ds-swatch__var">--color-primary-800</div></div>
+        </div>
+        <div class="ds-swatch" onclick="copyText('#312E81', this)" title="Copy #312E81">
+          <div class="ds-swatch__color" style="background:#312E81;"></div>
+          <div class="ds-swatch__info"><div class="ds-swatch__step">900</div><div class="ds-swatch__hex">#312E81</div><div class="ds-swatch__var">--color-primary-900</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success -->
+    <div class="ds-color-family">
+      <div class="ds-color-family__name">Success — Green</div>
+      <div class="ds-color-scale">
+        <div class="ds-swatch" onclick="copyText('#F0FDF4', this)"><div class="ds-swatch__color" style="background:#F0FDF4;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">50</div><div class="ds-swatch__hex">#F0FDF4</div><div class="ds-swatch__var">--color-success-50</div></div></div>
+        <div class="ds-swatch" onclick="copyText('#DCFCE7', this)"><div class="ds-swatch__color" style="background:#DCFCE7;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">100</div><div class="ds-swatch__hex">#DCFCE7</div><div class="ds-swatch__var">--color-success-100</div></div></div>
+        <div class="ds-swatch" onclick="copyText('#22C55E', this)"><div class="ds-swatch__color" style="background:#22C55E;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">500</div><div class="ds-swatch__hex">#22C55E</div><div class="ds-swatch__var">--color-success-500</div></div></div>
+        <div class="ds-swatch" onclick="copyText('#16A34A', this)" style="box-shadow:0 0 0 2px var(--color-success-600);"><div class="ds-swatch__color" style="background:#16A34A;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">600 ★</div><div class="ds-swatch__hex">#16A34A</div><div class="ds-swatch__var">--color-success-600</div></div></div>
+        <div class="ds-swatch" onclick="copyText('#15803D', this)"><div class="ds-swatch__color" style="background:#15803D;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">700</div><div class="ds-swatch__hex">#15803D</div><div class="ds-swatch__var">--color-success-700</div></div></div>
+      </div>
+    </div>
+
+    <!-- Warning -->
+    <div class="ds-color-family">
+      <div class="ds-color-family__name">Warning — Amber</div>
+      <div class="ds-color-scale">
+        <div class="ds-swatch" onclick="copyText('#FFFBEB', this)"><div class="ds-swatch__color" style="background:#FFFBEB;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">50</div><div class="ds-swatch__hex">#FFFBEB</div><div class="ds-swatch__var">--color-warning-50</div></div></div>
+        <div class="ds-swatch" onclick="copyText('#FEF3C7', this)"><div class="ds-swatch__color" style="background:#FEF3C7;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">100</div><div class="ds-swatch__hex">#FEF3C7</div><div class="ds-swatch__var">--color-warning-100</div></div></div>
+        <div class="ds-swatch" onclick="copyText('#F59E0B', this)"><div class="ds-swatch__color" style="background:#F59E0B;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">500</div><div class="ds-swatch__hex">#F59E0B</div><div class="ds-swatch__var">--color-warning-500</div></div></div>
+        <div class="ds-swatch" onclick="copyText('#D97706', this)" style="box-shadow:0 0 0 2px #D97706;"><div class="ds-swatch__color" style="background:#D97706;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">600 ★</div><div class="ds-swatch__hex">#D97706</div><div class="ds-swatch__var">--color-warning-600</div></div></div>
+        <div class="ds-swatch" onclick="copyText('#B45309', this)"><div class="ds-swatch__color" style="background:#B45309;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">700</div><div class="ds-swatch__hex">#B45309</div><div class="ds-swatch__var">--color-warning-700</div></div></div>
+      </div>
+    </div>
+
+    <!-- Danger -->
+    <div class="ds-color-family">
+      <div class="ds-color-family__name">Danger — Red</div>
+      <div class="ds-color-scale">
+        <div class="ds-swatch" onclick="copyText('#FEF2F2', this)"><div class="ds-swatch__color" style="background:#FEF2F2;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">50</div><div class="ds-swatch__hex">#FEF2F2</div><div class="ds-swatch__var">--color-danger-50</div></div></div>
+        <div class="ds-swatch" onclick="copyText('#FEE2E2', this)"><div class="ds-swatch__color" style="background:#FEE2E2;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">100</div><div class="ds-swatch__hex">#FEE2E2</div><div class="ds-swatch__var">--color-danger-100</div></div></div>
+        <div class="ds-swatch" onclick="copyText('#EF4444', this)"><div class="ds-swatch__color" style="background:#EF4444;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">500</div><div class="ds-swatch__hex">#EF4444</div><div class="ds-swatch__var">--color-danger-500</div></div></div>
+        <div class="ds-swatch" onclick="copyText('#DC2626', this)" style="box-shadow:0 0 0 2px #DC2626;"><div class="ds-swatch__color" style="background:#DC2626;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">600 ★</div><div class="ds-swatch__hex">#DC2626</div><div class="ds-swatch__var">--color-danger-600</div></div></div>
+        <div class="ds-swatch" onclick="copyText('#B91C1C', this)"><div class="ds-swatch__color" style="background:#B91C1C;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">700</div><div class="ds-swatch__hex">#B91C1C</div><div class="ds-swatch__var">--color-danger-700</div></div></div>
+      </div>
+    </div>
+
+    <!-- Neutral -->
+    <div class="ds-color-family">
+      <div class="ds-color-family__name">Neutral — Gray</div>
+      <div class="ds-color-scale">
+        <div class="ds-swatch" onclick="copyText('#F9FAFB', this)"><div class="ds-swatch__color" style="background:#F9FAFB;border:1px solid #E5E7EB;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">50</div><div class="ds-swatch__hex">#F9FAFB</div><div class="ds-swatch__var">--neutral-50</div></div></div>
+        <div class="ds-swatch" onclick="copyText('#F3F4F6', this)"><div class="ds-swatch__color" style="background:#F3F4F6;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">100</div><div class="ds-swatch__hex">#F3F4F6</div><div class="ds-swatch__var">--neutral-100</div></div></div>
+        <div class="ds-swatch" onclick="copyText('#E5E7EB', this)"><div class="ds-swatch__color" style="background:#E5E7EB;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">200</div><div class="ds-swatch__hex">#E5E7EB</div><div class="ds-swatch__var">--neutral-200</div></div></div>
+        <div class="ds-swatch" onclick="copyText('#D1D5DB', this)"><div class="ds-swatch__color" style="background:#D1D5DB;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">300</div><div class="ds-swatch__hex">#D1D5DB</div><div class="ds-swatch__var">--neutral-300</div></div></div>
+        <div class="ds-swatch" onclick="copyText('#9CA3AF', this)"><div class="ds-swatch__color" style="background:#9CA3AF;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">400</div><div class="ds-swatch__hex">#9CA3AF</div><div class="ds-swatch__var">--neutral-400</div></div></div>
+        <div class="ds-swatch" onclick="copyText('#6B7280', this)"><div class="ds-swatch__color" style="background:#6B7280;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">500</div><div class="ds-swatch__hex">#6B7280</div><div class="ds-swatch__var">--neutral-500</div></div></div>
+        <div class="ds-swatch" onclick="copyText('#4B5563', this)"><div class="ds-swatch__color" style="background:#4B5563;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">600</div><div class="ds-swatch__hex">#4B5563</div><div class="ds-swatch__var">--neutral-600</div></div></div>
+        <div class="ds-swatch" onclick="copyText('#374151', this)"><div class="ds-swatch__color" style="background:#374151;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">700</div><div class="ds-swatch__hex">#374151</div><div class="ds-swatch__var">--neutral-700</div></div></div>
+        <div class="ds-swatch" onclick="copyText('#1F2937', this)"><div class="ds-swatch__color" style="background:#1F2937;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">800</div><div class="ds-swatch__hex">#1F2937</div><div class="ds-swatch__var">--neutral-800</div></div></div>
+        <div class="ds-swatch" onclick="copyText('#111827', this)"><div class="ds-swatch__color" style="background:#111827;"></div><div class="ds-swatch__info"><div class="ds-swatch__step">900</div><div class="ds-swatch__hex">#111827</div><div class="ds-swatch__var">--neutral-900</div></div></div>
+      </div>
+    </div>
+
+    <!-- Semantic aliases -->
+    <div class="ds-block" style="margin-top:var(--space-8);">
+      <div class="ds-block__label">Semantic Aliases</div>
+      <div class="ds-block__desc">Use these tokens instead of raw palette values wherever possible — they respect future theming.</div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table class="ds-table">
+          <thead>
+            <tr>
+              <th>Token</th>
+              <th>Value</th>
+              <th>Use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>--color-bg-page</code></td><td><span class="ds-table__swatch" style="background:#F9FAFB;border:1px solid #E5E7EB;"></span>neutral-50</td><td>Page background</td></tr>
+            <tr><td><code>--color-bg-card</code></td><td><span class="ds-table__swatch" style="background:#FFFFFF;border:1px solid #E5E7EB;"></span>white</td><td>Card / panel background</td></tr>
+            <tr><td><code>--color-border</code></td><td><span class="ds-table__swatch" style="background:#E5E7EB;"></span>neutral-200</td><td>Borders, dividers</td></tr>
+            <tr><td><code>--color-border-focus</code></td><td><span class="ds-table__swatch" style="background:#4F46E5;"></span>primary-600</td><td>Focus ring</td></tr>
+            <tr><td><code>--color-text-primary</code></td><td><span class="ds-table__swatch" style="background:#111827;"></span>neutral-900</td><td>Headings, body</td></tr>
+            <tr><td><code>--color-text-secondary</code></td><td><span class="ds-table__swatch" style="background:#4B5563;"></span>neutral-600</td><td>Captions, meta</td></tr>
+            <tr><td><code>--color-text-placeholder</code></td><td><span class="ds-table__swatch" style="background:#9CA3AF;"></span>neutral-400</td><td>Input placeholders</td></tr>
+            <tr><td><code>--color-text-link</code></td><td><span class="ds-table__swatch" style="background:#4F46E5;"></span>primary-600</td><td>Links</td></tr>
+            <tr><td><code>--color-text-inverse</code></td><td><span class="ds-table__swatch" style="background:#FFFFFF;border:1px solid #E5E7EB;"></span>white</td><td>Text on dark bg</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TYPOGRAPHY -->
+  <section class="ds-section" id="typography">
+    <div class="ds-section__header">
+      <h2 class="ds-section__title">Typography</h2>
+      <span class="ds-section__subtitle">Inter · 8px baseline grid</span>
+    </div>
+
+    <div class="ds-block">
+      <div class="ds-block__label">Type Scale</div>
+      <div class="card" style="padding:var(--space-6);">
+        <div class="ds-type-row">
+          <div class="ds-type-row__sample text-heading-2xl">Heading 2XL</div>
+          <div class="ds-type-row__meta">30px / Bold 700 · <code>.text-heading-2xl</code></div>
+        </div>
+        <div class="ds-type-row">
+          <div class="ds-type-row__sample text-heading-xl">Heading XL</div>
+          <div class="ds-type-row__meta">24px / SemiBold 600 · <code>.text-heading-xl</code></div>
+        </div>
+        <div class="ds-type-row">
+          <div class="ds-type-row__sample text-heading-lg">Heading LG</div>
+          <div class="ds-type-row__meta">20px / SemiBold 600 · <code>.text-heading-lg</code></div>
+        </div>
+        <div class="ds-type-row">
+          <div class="ds-type-row__sample text-heading-md">Heading MD</div>
+          <div class="ds-type-row__meta">16px / SemiBold 600 · <code>.text-heading-md</code></div>
+        </div>
+        <div class="ds-type-row">
+          <div class="ds-type-row__sample text-body-md">Body MD — The quick brown fox jumps over the lazy dog.</div>
+          <div class="ds-type-row__meta">14px / Regular 400 · <code>.text-body-md</code></div>
+        </div>
+        <div class="ds-type-row">
+          <div class="ds-type-row__sample text-body-sm text-secondary">Body SM — Secondary copy, table cells, descriptions.</div>
+          <div class="ds-type-row__meta">13px / Regular 400 · <code>.text-body-sm</code></div>
+        </div>
+        <div class="ds-type-row">
+          <div class="ds-type-row__sample text-label-sm text-secondary">LABEL SM · 12PX / MEDIUM 500</div>
+          <div class="ds-type-row__meta">12px / Medium 500 · <code>.text-label-sm</code></div>
+        </div>
+        <div class="ds-type-row">
+          <div class="ds-type-row__sample text-mono">INV-0047 · $14,000.00 · Monospace</div>
+          <div class="ds-type-row__meta">13px / Mono · <code>.text-mono</code></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ds-block">
+      <div class="ds-block__label">Fonts</div>
+      <div class="two-col">
+        <div class="card">
+          <div style="font-size:var(--font-size-xs);font-weight:var(--font-weight-semibold);color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:var(--space-3);">Sans-serif</div>
+          <div style="font-size:28px;font-weight:700;margin-bottom:var(--space-1);">Inter</div>
+          <div style="font-size:var(--font-size-sm);color:var(--color-text-secondary);margin-bottom:var(--space-3);">Aa Bb Cc 0123456789</div>
+          <code style="font-size:11px;">--font-family-base</code>
+        </div>
+        <div class="card">
+          <div style="font-size:var(--font-size-xs);font-weight:var(--font-weight-semibold);color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:var(--space-3);">Monospace</div>
+          <div style="font-size:28px;font-weight:700;font-family:var(--font-family-mono);margin-bottom:var(--space-1);">Mono</div>
+          <div style="font-family:var(--font-family-mono);font-size:var(--font-size-sm);color:var(--color-text-secondary);margin-bottom:var(--space-3);">Aa Bb Cc 0123456789</div>
+          <code style="font-size:11px;">--font-family-mono</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="ds-component">
+      <div class="ds-component__code-bar">
+        <span class="ds-component__code-lang">HTML · Typography utilities</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre class="ds-component__code">&lt;<span class="code-tag">h1</span> <span class="code-attr">class</span>=<span class="code-val">"text-heading-2xl"</span>&gt;Page title&lt;/<span class="code-tag">h1</span>&gt;
+&lt;<span class="code-tag">h2</span> <span class="code-attr">class</span>=<span class="code-val">"text-heading-xl"</span>&gt;Section heading&lt;/<span class="code-tag">h2</span>&gt;
+&lt;<span class="code-tag">p</span>  <span class="code-attr">class</span>=<span class="code-val">"text-body-md"</span>&gt;Body paragraph&lt;/<span class="code-tag">p</span>&gt;
+&lt;<span class="code-tag">p</span>  <span class="code-attr">class</span>=<span class="code-val">"text-body-sm text-secondary"</span>&gt;Meta copy&lt;/<span class="code-tag">p</span>&gt;
+&lt;<span class="code-tag">span</span> <span class="code-attr">class</span>=<span class="code-val">"text-mono"</span>&gt;INV-0001&lt;/<span class="code-tag">span</span>&gt;</pre>
+    </div>
+  </section>
+
+  <!-- SPACING -->
+  <section class="ds-section" id="spacing">
+    <div class="ds-section__header">
+      <h2 class="ds-section__title">Spacing</h2>
+      <span class="ds-section__subtitle">8px grid system</span>
+    </div>
+
+    <div class="card" style="padding:var(--space-6);">
+      <div class="ds-spacing-grid">
+        <div class="ds-spacing-row"><div class="ds-spacing-name">--space-1</div><div class="ds-spacing-val">4px</div><div class="ds-spacing-bar-wrap"><div class="ds-spacing-bar" style="width:4px;"></div></div></div>
+        <div class="ds-spacing-row"><div class="ds-spacing-name">--space-2</div><div class="ds-spacing-val">8px</div><div class="ds-spacing-bar-wrap"><div class="ds-spacing-bar" style="width:8px;"></div></div></div>
+        <div class="ds-spacing-row"><div class="ds-spacing-name">--space-3</div><div class="ds-spacing-val">12px</div><div class="ds-spacing-bar-wrap"><div class="ds-spacing-bar" style="width:12px;"></div></div></div>
+        <div class="ds-spacing-row"><div class="ds-spacing-name">--space-4</div><div class="ds-spacing-val">16px</div><div class="ds-spacing-bar-wrap"><div class="ds-spacing-bar" style="width:16px;"></div></div></div>
+        <div class="ds-spacing-row"><div class="ds-spacing-name">--space-5</div><div class="ds-spacing-val">20px</div><div class="ds-spacing-bar-wrap"><div class="ds-spacing-bar" style="width:20px;"></div></div></div>
+        <div class="ds-spacing-row"><div class="ds-spacing-name">--space-6</div><div class="ds-spacing-val">24px</div><div class="ds-spacing-bar-wrap"><div class="ds-spacing-bar" style="width:24px;"></div></div></div>
+        <div class="ds-spacing-row"><div class="ds-spacing-name">--space-8</div><div class="ds-spacing-val">32px</div><div class="ds-spacing-bar-wrap"><div class="ds-spacing-bar" style="width:32px;"></div></div></div>
+        <div class="ds-spacing-row"><div class="ds-spacing-name">--space-10</div><div class="ds-spacing-val">40px</div><div class="ds-spacing-bar-wrap"><div class="ds-spacing-bar" style="width:40px;"></div></div></div>
+        <div class="ds-spacing-row"><div class="ds-spacing-name">--space-12</div><div class="ds-spacing-val">48px</div><div class="ds-spacing-bar-wrap"><div class="ds-spacing-bar" style="width:48px;"></div></div></div>
+        <div class="ds-spacing-row"><div class="ds-spacing-name">--space-16</div><div class="ds-spacing-val">64px</div><div class="ds-spacing-bar-wrap"><div class="ds-spacing-bar" style="width:64px;"></div></div></div>
+        <div class="ds-spacing-row"><div class="ds-spacing-name">--space-20</div><div class="ds-spacing-val">80px</div><div class="ds-spacing-bar-wrap"><div class="ds-spacing-bar" style="width:80px;"></div></div></div>
+        <div class="ds-spacing-row"><div class="ds-spacing-name">--space-24</div><div class="ds-spacing-val">96px</div><div class="ds-spacing-bar-wrap"><div class="ds-spacing-bar" style="width:96px;"></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BORDER RADIUS -->
+  <section class="ds-section" id="radius">
+    <div class="ds-section__header">
+      <h2 class="ds-section__title">Border Radius</h2>
+    </div>
+
+    <div class="card" style="padding:var(--space-8);">
+      <div class="ds-radius-grid">
+        <div class="ds-radius-item">
+          <div class="ds-radius-demo" style="border-radius:var(--radius-sm);"></div>
+          <div class="ds-radius-label"><code>--radius-sm</code><br>4px</div>
+        </div>
+        <div class="ds-radius-item">
+          <div class="ds-radius-demo" style="border-radius:var(--radius-md);"></div>
+          <div class="ds-radius-label"><code>--radius-md</code><br>8px · default</div>
+        </div>
+        <div class="ds-radius-item">
+          <div class="ds-radius-demo" style="border-radius:var(--radius-lg);"></div>
+          <div class="ds-radius-label"><code>--radius-lg</code><br>12px · cards</div>
+        </div>
+        <div class="ds-radius-item">
+          <div class="ds-radius-demo" style="border-radius:var(--radius-xl);"></div>
+          <div class="ds-radius-label"><code>--radius-xl</code><br>16px · modals</div>
+        </div>
+        <div class="ds-radius-item">
+          <div class="ds-radius-demo" style="border-radius:var(--radius-full);width:64px;height:64px;"></div>
+          <div class="ds-radius-label"><code>--radius-full</code><br>9999px · pills</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHADOWS -->
+  <section class="ds-section" id="shadows">
+    <div class="ds-section__header">
+      <h2 class="ds-section__title">Shadows</h2>
+    </div>
+
+    <div class="ds-shadows-grid" style="background:var(--color-neutral-100);padding:var(--space-8);border-radius:var(--radius-lg);">
+      <div class="ds-shadow-card" style="box-shadow:var(--shadow-xs);">
+        <code>--shadow-xs</code>
+        <div class="ds-shadow-card__name">Subtle lift</div>
+      </div>
+      <div class="ds-shadow-card" style="box-shadow:var(--shadow-sm);">
+        <code>--shadow-sm</code>
+        <div class="ds-shadow-card__name">Cards, buttons</div>
+      </div>
+      <div class="ds-shadow-card" style="box-shadow:var(--shadow-md);">
+        <code>--shadow-md</code>
+        <div class="ds-shadow-card__name">Hover state</div>
+      </div>
+      <div class="ds-shadow-card" style="box-shadow:var(--shadow-lg);">
+        <code>--shadow-lg</code>
+        <div class="ds-shadow-card__name">Dropdowns</div>
+      </div>
+      <div class="ds-shadow-card" style="box-shadow:var(--shadow-xl);">
+        <code>--shadow-xl</code>
+        <div class="ds-shadow-card__name">Modals, sheets</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BUTTONS -->
+  <section class="ds-section" id="buttons">
+    <div class="ds-section__header">
+      <h2 class="ds-section__title">Buttons</h2>
+      <span class="ds-section__subtitle">4 variants · 3 sizes</span>
+    </div>
+
+    <div class="ds-block">
+      <div class="ds-block__label">Variants</div>
+      <div class="ds-component">
+        <div class="ds-component__preview">
+          <button class="btn btn--primary">Primary</button>
+          <button class="btn btn--secondary">Secondary</button>
+          <button class="btn btn--ghost">Ghost</button>
+          <button class="btn btn--danger">Danger</button>
+        </div>
+        <hr class="ds-component__divider" />
+        <div class="ds-component__code-bar">
+          <span class="ds-component__code-lang">HTML</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre class="ds-component__code">&lt;<span class="code-tag">button</span> <span class="code-attr">class</span>=<span class="code-val">"btn btn--primary"</span>&gt;Primary&lt;/<span class="code-tag">button</span>&gt;
+&lt;<span class="code-tag">button</span> <span class="code-attr">class</span>=<span class="code-val">"btn btn--secondary"</span>&gt;Secondary&lt;/<span class="code-tag">button</span>&gt;
+&lt;<span class="code-tag">button</span> <span class="code-attr">class</span>=<span class="code-val">"btn btn--ghost"</span>&gt;Ghost&lt;/<span class="code-tag">button</span>&gt;
+&lt;<span class="code-tag">button</span> <span class="code-attr">class</span>=<span class="code-val">"btn btn--danger"</span>&gt;Danger&lt;/<span class="code-tag">button</span>&gt;</pre>
+      </div>
+    </div>
+
+    <div class="ds-block">
+      <div class="ds-block__label">Sizes</div>
+      <div class="ds-component">
+        <div class="ds-component__preview">
+          <button class="btn btn--primary btn--sm">Small</button>
+          <button class="btn btn--primary">Default</button>
+          <button class="btn btn--primary btn--lg">Large</button>
+        </div>
+        <hr class="ds-component__divider" />
+        <div class="ds-component__code-bar">
+          <span class="ds-component__code-lang">HTML</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre class="ds-component__code">&lt;<span class="code-tag">button</span> <span class="code-attr">class</span>=<span class="code-val">"btn btn--primary btn--sm"</span>&gt;Small&lt;/<span class="code-tag">button</span>&gt;
+&lt;<span class="code-tag">button</span> <span class="code-attr">class</span>=<span class="code-val">"btn btn--primary"</span>&gt;Default&lt;/<span class="code-tag">button</span>&gt;
+&lt;<span class="code-tag">button</span> <span class="code-attr">class</span>=<span class="code-val">"btn btn--primary btn--lg"</span>&gt;Large&lt;/<span class="code-tag">button</span>&gt;</pre>
+      </div>
+    </div>
+
+    <div class="ds-block">
+      <div class="ds-block__label">Disabled state</div>
+      <div class="ds-component">
+        <div class="ds-component__preview">
+          <button class="btn btn--primary" disabled style="opacity:0.5;cursor:not-allowed;">Disabled</button>
+          <button class="btn btn--secondary" disabled style="opacity:0.5;cursor:not-allowed;">Disabled</button>
+        </div>
+        <hr class="ds-component__divider" />
+        <div class="ds-component__code-bar">
+          <span class="ds-component__code-lang">HTML</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre class="ds-component__code">&lt;<span class="code-tag">button</span> <span class="code-attr">class</span>=<span class="code-val">"btn btn--primary"</span> <span class="code-attr">disabled</span> <span class="code-attr">style</span>=<span class="code-val">"opacity:0.5;cursor:not-allowed;"</span>&gt;Disabled&lt;/<span class="code-tag">button</span>&gt;</pre>
+      </div>
+    </div>
+
+    <!-- CSS reference -->
+    <div class="ds-component" style="margin-top:var(--space-4);">
+      <div class="ds-component__code-bar">
+        <span class="ds-component__code-lang">CSS · Button token reference</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre class="ds-component__code"><span class="code-comment">/* Core button styles live in design-tokens.css */</span>
+<span class="code-prop">.btn</span>             <span class="code-comment">/* base */</span>
+<span class="code-prop">.btn--primary</span>    <span class="code-comment">/* indigo fill */</span>
+<span class="code-prop">.btn--secondary</span>  <span class="code-comment">/* white with border */</span>
+<span class="code-prop">.btn--ghost</span>      <span class="code-comment">/* transparent */</span>
+<span class="code-prop">.btn--danger</span>     <span class="code-comment">/* red fill */</span>
+<span class="code-prop">.btn--sm</span>         <span class="code-comment">/* 28px height */</span>
+<span class="code-prop">.btn--lg</span>         <span class="code-comment">/* 44px height */</span></pre>
+    </div>
+  </section>
+
+  <!-- BADGES -->
+  <section class="ds-section" id="badges">
+    <div class="ds-section__header">
+      <h2 class="ds-section__title">Badges</h2>
+      <span class="ds-section__subtitle">Status indicators for invoices, deals, and tags</span>
+    </div>
+
+    <div class="ds-component">
+      <div class="ds-component__preview">
+        <span class="badge badge--draft">Draft</span>
+        <span class="badge badge--sent">Sent</span>
+        <span class="badge badge--viewed">Viewed</span>
+        <span class="badge badge--paid">Paid</span>
+        <span class="badge badge--overdue">Overdue</span>
+        <span class="badge badge--won">Won</span>
+        <span class="badge badge--lost">Lost</span>
+      </div>
+      <hr class="ds-component__divider" />
+      <div class="ds-component__code-bar">
+        <span class="ds-component__code-lang">HTML</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre class="ds-component__code">&lt;<span class="code-tag">span</span> <span class="code-attr">class</span>=<span class="code-val">"badge badge--draft"</span>&gt;Draft&lt;/<span class="code-tag">span</span>&gt;
+&lt;<span class="code-tag">span</span> <span class="code-attr">class</span>=<span class="code-val">"badge badge--sent"</span>&gt;Sent&lt;/<span class="code-tag">span</span>&gt;
+&lt;<span class="code-tag">span</span> <span class="code-attr">class</span>=<span class="code-val">"badge badge--viewed"</span>&gt;Viewed&lt;/<span class="code-tag">span</span>&gt;
+&lt;<span class="code-tag">span</span> <span class="code-attr">class</span>=<span class="code-val">"badge badge--paid"</span>&gt;Paid&lt;/<span class="code-tag">span</span>&gt;
+&lt;<span class="code-tag">span</span> <span class="code-attr">class</span>=<span class="code-val">"badge badge--overdue"</span>&gt;Overdue&lt;/<span class="code-tag">span</span>&gt;
+&lt;<span class="code-tag">span</span> <span class="code-attr">class</span>=<span class="code-val">"badge badge--won"</span>&gt;Won&lt;/<span class="code-tag">span</span>&gt;
+&lt;<span class="code-tag">span</span> <span class="code-attr">class</span>=<span class="code-val">"badge badge--lost"</span>&gt;Lost&lt;/<span class="code-tag">span</span>&gt;</pre>
+    </div>
+
+    <div style="margin-top:var(--space-4);padding:var(--space-4);background:var(--color-neutral-50);border-radius:var(--radius-lg);border:1px solid var(--color-border);">
+      <div style="font-size:var(--font-size-sm);font-weight:var(--font-weight-semibold);margin-bottom:var(--space-2);">Status token map</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:var(--space-2);">
+        <div style="font-size:var(--font-size-sm);">Draft → <code>--status-draft-*</code> · neutral</div>
+        <div style="font-size:var(--font-size-sm);">Sent → <code>--status-sent-*</code> · primary</div>
+        <div style="font-size:var(--font-size-sm);">Paid → <code>--status-paid-*</code> · success</div>
+        <div style="font-size:var(--font-size-sm);">Overdue → <code>--status-overdue-*</code> · danger</div>
+        <div style="font-size:var(--font-size-sm);">Won → <code>--status-won-*</code> · success</div>
+        <div style="font-size:var(--font-size-sm);">Lost → <code>--status-lost-*</code> · neutral</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INPUTS -->
+  <section class="ds-section" id="inputs">
+    <div class="ds-section__header">
+      <h2 class="ds-section__title">Inputs</h2>
+      <span class="ds-section__subtitle">Text fields and form controls</span>
+    </div>
+
+    <div class="ds-component">
+      <div class="ds-component__preview" style="flex-direction:column;align-items:stretch;max-width:400px;">
+        <input class="input" type="text" placeholder="Default — placeholder text" />
+        <input class="input" type="text" value="Focused state" style="border-color:var(--color-border-focus);box-shadow:0 0 0 3px rgba(79,70,229,0.12);" />
+        <input class="input input--error" type="text" value="Error state" />
+        <input class="input" type="text" placeholder="Disabled" disabled style="opacity:0.5;cursor:not-allowed;" />
+      </div>
+      <hr class="ds-component__divider" />
+      <div class="ds-component__code-bar">
+        <span class="ds-component__code-lang">HTML</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre class="ds-component__code"><span class="code-comment">&lt;!-- Default --&gt;</span>
+&lt;<span class="code-tag">input</span> <span class="code-attr">class</span>=<span class="code-val">"input"</span> <span class="code-attr">type</span>=<span class="code-val">"text"</span> <span class="code-attr">placeholder</span>=<span class="code-val">"Enter value..."</span> /&gt;
+
+<span class="code-comment">&lt;!-- Error --&gt;</span>
+&lt;<span class="code-tag">input</span> <span class="code-attr">class</span>=<span class="code-val">"input input--error"</span> <span class="code-attr">type</span>=<span class="code-val">"text"</span> /&gt;
+
+<span class="code-comment">&lt;!-- Disabled --&gt;</span>
+&lt;<span class="code-tag">input</span> <span class="code-attr">class</span>=<span class="code-val">"input"</span> <span class="code-attr">type</span>=<span class="code-val">"text"</span> <span class="code-attr">disabled</span>
+       <span class="code-attr">style</span>=<span class="code-val">"opacity:0.5;cursor:not-allowed;"</span> /&gt;</pre>
+    </div>
+  </section>
+
+  <!-- CARDS -->
+  <section class="ds-section" id="cards">
+    <div class="ds-section__header">
+      <h2 class="ds-section__title">Cards</h2>
+    </div>
+
+    <div class="ds-component">
+      <div class="ds-component__preview ds-component__preview--tall" style="flex-direction:column;align-items:flex-start;gap:var(--space-4);">
+        <div class="card" style="min-width:280px;">
+          <div class="text-heading-md" style="margin-bottom:var(--space-1);">Card Title</div>
+          <div class="text-body-sm text-secondary">Supporting description text goes here. Cards use <code>--radius-lg</code> and <code>--shadow-sm</code>.</div>
+        </div>
+        <div class="card" style="min-width:280px;border-left:3px solid var(--color-primary-500);">
+          <div class="text-heading-md" style="margin-bottom:var(--space-1);">Accent Card</div>
+          <div class="text-body-sm text-secondary">Add a left border for emphasis.</div>
+        </div>
+      </div>
+      <hr class="ds-component__divider" />
+      <div class="ds-component__code-bar">
+        <span class="ds-component__code-lang">HTML</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre class="ds-component__code"><span class="code-comment">&lt;!-- Base card (.card utility class) --&gt;</span>
+&lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-val">"card"</span>&gt;
+  &lt;<span class="code-tag">h3</span> <span class="code-attr">class</span>=<span class="code-val">"text-heading-md"</span>&gt;Title&lt;/<span class="code-tag">h3</span>&gt;
+  &lt;<span class="code-tag">p</span>  <span class="code-attr">class</span>=<span class="code-val">"text-body-sm text-secondary"</span>&gt;Description&lt;/<span class="code-tag">p</span>&gt;
+&lt;/<span class="code-tag">div</span>&gt;
+
+<span class="code-comment">&lt;!-- CSS (in design-tokens.css) --&gt;</span>
+<span class="code-prop">.card</span> {
+  background: <span class="code-str">var(--color-bg-card)</span>;
+  border: 1px solid <span class="code-str">var(--color-border)</span>;
+  border-radius: <span class="code-str">var(--radius-lg)</span>;
+  box-shadow: <span class="code-str">var(--shadow-sm)</span>;
+  padding: <span class="code-str">var(--card-padding)</span>; <span class="code-comment">/* 24px */</span>
+}</pre>
+    </div>
+  </section>
+
+  <!-- AVATARS -->
+  <section class="ds-section" id="avatars">
+    <div class="ds-section__header">
+      <h2 class="ds-section__title">Avatars</h2>
+      <span class="ds-section__subtitle">4 sizes · initials or image</span>
+    </div>
+
+    <div class="ds-component">
+      <div class="ds-component__preview">
+        <div class="avatar avatar--sm">SL</div>
+        <div class="avatar avatar--md">MC</div>
+        <div class="avatar avatar--lg" style="background:var(--color-success-50);color:var(--color-success-700);">JR</div>
+        <div class="avatar avatar--xl" style="background:var(--color-warning-50);color:var(--color-warning-700);">TP</div>
+        <div class="avatar avatar--xl"><img src="https://i.pravatar.cc/48" alt="User" /></div>
+      </div>
+      <hr class="ds-component__divider" />
+      <div class="ds-component__code-bar">
+        <span class="ds-component__code-lang">HTML</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre class="ds-component__code"><span class="code-comment">&lt;!-- Initials avatar --&gt;</span>
+&lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-val">"avatar avatar--sm"</span>&gt;SL&lt;/<span class="code-tag">div</span>&gt;
+&lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-val">"avatar avatar--md"</span>&gt;MC&lt;/<span class="code-tag">div</span>&gt;
+&lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-val">"avatar avatar--lg"</span>&gt;JR&lt;/<span class="code-tag">div</span>&gt;
+&lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-val">"avatar avatar--xl"</span>&gt;TP&lt;/<span class="code-tag">div</span>&gt;
+
+<span class="code-comment">&lt;!-- Image avatar --&gt;</span>
+&lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-val">"avatar avatar--xl"</span>&gt;
+  &lt;<span class="code-tag">img</span> <span class="code-attr">src</span>=<span class="code-val">"user.jpg"</span> <span class="code-attr">alt</span>=<span class="code-val">"User"</span> /&gt;
+&lt;/<span class="code-tag">div</span>&gt;
+
+<span class="code-comment">&lt;!-- Sizes: --sm 24px · --md 32px · --lg 40px · --xl 48px --&gt;</span></pre>
+    </div>
+  </section>
+
+  <!-- TOASTS -->
+  <section class="ds-section" id="toasts">
+    <div class="ds-section__header">
+      <h2 class="ds-section__title">Toasts</h2>
+      <span class="ds-section__subtitle">Notification messages · z-index: 400</span>
+    </div>
+
+    <div class="ds-component">
+      <div class="ds-component__preview" style="flex-direction:column;align-items:flex-start;gap:var(--space-3);">
+        <div class="ds-toast ds-toast--success">
+          <div class="ds-toast__icon">✓</div>
+          <div class="ds-toast__body">
+            <div class="ds-toast__title">Invoice sent successfully</div>
+            <div class="ds-toast__msg">INV-0047 was emailed to client@example.com</div>
+          </div>
+        </div>
+        <div class="ds-toast ds-toast--warning">
+          <div class="ds-toast__icon">⚠</div>
+          <div class="ds-toast__body">
+            <div class="ds-toast__title">Payment overdue by 7 days</div>
+            <div class="ds-toast__msg">Consider sending a reminder to the client.</div>
+          </div>
+        </div>
+        <div class="ds-toast ds-toast--danger">
+          <div class="ds-toast__icon">✕</div>
+          <div class="ds-toast__body">
+            <div class="ds-toast__title">Failed to send invoice</div>
+            <div class="ds-toast__msg">SMTP connection timed out. Please try again.</div>
+          </div>
+        </div>
+        <div class="ds-toast ds-toast--info">
+          <div class="ds-toast__icon">ℹ</div>
+          <div class="ds-toast__body">
+            <div class="ds-toast__title">Deal moved to Proposal Sent</div>
+            <div class="ds-toast__msg">Acme Corp · $24,000</div>
+          </div>
+        </div>
+      </div>
+      <hr class="ds-component__divider" />
+      <div class="ds-component__code-bar">
+        <span class="ds-component__code-lang">HTML · Toast pattern</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <pre class="ds-component__code">&lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-val">"ds-toast ds-toast--success"</span>&gt;
+  &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-val">"ds-toast__icon"</span>&gt;✓&lt;/<span class="code-tag">div</span>&gt;
+  &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-val">"ds-toast__body"</span>&gt;
+    &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-val">"ds-toast__title"</span>&gt;Invoice sent&lt;/<span class="code-tag">div</span>&gt;
+    &lt;<span class="code-tag">div</span> <span class="code-attr">class</span>=<span class="code-val">"ds-toast__msg"</span>&gt;Emailed to client.&lt;/<span class="code-tag">div</span>&gt;
+  &lt;/<span class="code-tag">div</span>&gt;
+&lt;/<span class="code-tag">div</span>&gt;
+
+<span class="code-comment">&lt;!-- Variants: --success · --warning · --danger · --info --&gt;</span>
+<span class="code-comment">&lt;!-- Position with: position:fixed; bottom:24px; right:24px; z-index:var(--z-toast); --&gt;</span></pre>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <hr class="divider" style="margin-top:var(--space-8);" />
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--space-4) 0 var(--space-10);">
+    <div style="font-size:var(--font-size-sm);color:var(--color-text-secondary);">
+      Zephyr Design System · Calm Power v1.0 · <a href="design-tokens.css" class="text-link" download>design-tokens.css</a>
+    </div>
+    <div style="font-size:var(--font-size-sm);color:var(--color-text-secondary);">
+      ZAS-79 · Web Designer Agent
+    </div>
+  </div>
+
+</main>
+
+<!-- ============================
+     SCRIPTS
+============================= -->
+<script>
+  /* Copy code block */
+  function copyCode(btn) {
+    const pre = btn.closest('.ds-component').querySelector('.ds-component__code');
+    const text = pre ? pre.innerText : '';
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
+    });
+  }
+
+  /* Copy swatch hex */
+  function copyText(text, el) {
+    navigator.clipboard.writeText(text).then(() => {
+      const orig = el.querySelector('.ds-swatch__step').textContent;
+      el.querySelector('.ds-swatch__step').textContent = 'Copied!';
+      setTimeout(() => { el.querySelector('.ds-swatch__step').textContent = orig; }, 1500);
+    });
+  }
+
+  /* Active nav highlight on scroll */
+  const sections = document.querySelectorAll('section[id]');
+  const links    = document.querySelectorAll('.ds-nav__link[href^="#"]');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('is-active'));
+        const active = document.querySelector(`.ds-nav__link[href="#${e.target.id}"]`);
+        if (active) active.classList.add('is-active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
