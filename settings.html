@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings — Zephyr</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="design-tokens.css" />
+  <style>
+    /* SHARED SHELL */
+    .app-shell { display: flex; min-height: 100vh; }
+    .sidebar { width: var(--sidebar-width); background: var(--color-bg-sidebar); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: var(--z-sticky); overflow-y: auto; }
+    .sidebar__brand { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-5) var(--space-4); border-bottom: 1px solid var(--color-border); text-decoration: none; flex-shrink: 0; }
+    .sidebar__logo { width: 32px; height: 32px; background: var(--color-primary-600); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; color: white; font-weight: var(--font-weight-bold); font-size: 15px; flex-shrink: 0; }
+    .sidebar__brand-name { font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
+    .sidebar__nav { flex: 1; padding: var(--space-3) var(--space-2); }
+    .nav-item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); color: var(--color-text-secondary); text-decoration: none; font-size: var(--font-size-md); font-weight: var(--font-weight-medium); transition: background-color var(--transition-fast), color var(--transition-fast); cursor: pointer; }
+    .nav-item:hover { background: var(--color-neutral-100); color: var(--color-text-primary); }
+    .nav-item--active { background: var(--color-primary-50); color: var(--color-primary-700); }
+    .nav-item__icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 17px; }
+    .nav-item__badge { margin-left: auto; background: var(--color-danger-600); color: white; border-radius: var(--radius-full); font-size: 10px; font-weight: var(--font-weight-semibold); padding: 1px 6px; }
+    .sidebar__bottom { border-top: 1px solid var(--color-border); padding: var(--space-3) var(--space-2); }
+    .user-menu { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); cursor: pointer; }
+    .user-menu:hover { background: var(--color-neutral-100); }
+    .user-menu__name { font-size: var(--font-size-md); font-weight: var(--font-weight-medium); color: var(--color-text-primary); }
+    .user-menu__email { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+    .main { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar { height: var(--topbar-height); background: var(--color-bg-card); border-bottom: 1px solid var(--color-border); display: flex; align-items: center; gap: var(--space-4); padding: 0 var(--page-padding-x); position: sticky; top: 0; z-index: calc(var(--z-sticky) - 1); flex-shrink: 0; }
+    .topbar__title { font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); color: var(--color-text-primary); flex: 1; }
+    .topbar__actions { display: flex; align-items: center; gap: var(--space-2); }
+    .icon-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); border: none; background: transparent; color: var(--color-text-secondary); cursor: pointer; font-size: 18px; position: relative; }
+    .notification-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background: var(--color-danger-600); border-radius: var(--radius-full); border: 2px solid var(--color-bg-card); }
+    .search-trigger { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); background: var(--color-neutral-100); border: 1px solid var(--color-border); border-radius: var(--radius-md); color: var(--color-text-secondary); font-size: var(--font-size-md); cursor: pointer; min-width: 240px; }
+    .search-trigger__kbd { margin-left: auto; font-size: var(--font-size-xs); background: var(--color-white); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 1px 5px; color: var(--color-text-placeholder); }
+    select.input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' viewBox='0 0 24 24' stroke='%239CA3AF' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; cursor: pointer; }
+
+    /* ===== SETTINGS LAYOUT ===== */
+    .settings-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 0;
+      flex: 1;
+    }
+
+    /* Settings sub-nav */
+    .settings-subnav {
+      border-right: 1px solid var(--color-border);
+      padding: var(--space-5) 0;
+      background: var(--color-white);
+      position: sticky;
+      top: var(--topbar-height);
+      height: calc(100vh - var(--topbar-height));
+      overflow-y: auto;
+    }
+
+    .settings-subnav__group { margin-bottom: var(--space-5); }
+    .settings-subnav__label {
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-placeholder);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0 var(--space-4) var(--space-2);
+    }
+    .settings-nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-2) var(--space-4);
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: background-color var(--transition-fast), color var(--transition-fast);
+      text-decoration: none;
+    }
+    .settings-nav-item:hover { background: var(--color-neutral-50); color: var(--color-text-primary); }
+    .settings-nav-item--active { background: var(--color-primary-50); color: var(--color-primary-700); font-weight: var(--font-weight-medium); }
+    .settings-nav-item__icon { font-size: 16px; }
+
+    /* Settings content area */
+    .settings-content {
+      padding: var(--space-8);
+      max-width: 720px;
+    }
+
+    .settings-panel { display: none; }
+    .settings-panel--active { display: block; }
+
+    .settings-section {
+      margin-bottom: var(--space-8);
+    }
+
+    .settings-section__title {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: 4px;
+    }
+    .settings-section__desc {
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-6);
+    }
+
+    /* Settings card */
+    .settings-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      margin-bottom: var(--space-5);
+    }
+
+    .settings-card__header {
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-neutral-50);
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    .settings-card__body { padding: var(--space-5); }
+
+    .settings-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: var(--space-4) 0;
+      border-bottom: 1px solid var(--color-neutral-100);
+      gap: var(--space-4);
+    }
+    .settings-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .settings-row:first-child { padding-top: 0; }
+
+    .settings-row__info { flex: 1; }
+    .settings-row__label { font-size: var(--font-size-md); font-weight: var(--font-weight-medium); color: var(--color-text-primary); margin-bottom: 3px; }
+    .settings-row__desc { font-size: var(--font-size-sm); color: var(--color-text-secondary); line-height: var(--line-height-relaxed); }
+    .settings-row__control { flex-shrink: 0; min-width: 200px; }
+
+    /* Toggle switch */
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: var(--color-neutral-300);
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: background-color var(--transition-fast);
+    }
+    .toggle-track::before {
+      content: '';
+      position: absolute;
+      width: 16px; height: 16px;
+      left: 3px; top: 3px;
+      background: white;
+      border-radius: var(--radius-full);
+      transition: transform var(--transition-fast);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .toggle input:checked + .toggle-track { background: var(--color-primary-600); }
+    .toggle input:checked + .toggle-track::before { transform: translateX(18px); }
+
+    /* Form fields within settings */
+    .settings-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+      margin-bottom: var(--space-4);
+    }
+
+    .form-field { display: flex; flex-direction: column; gap: var(--space-1); }
+    .form-field label { font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); color: var(--color-text-secondary); }
+    .form-field .hint { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+
+    /* Logo upload in settings */
+    .logo-current {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-4);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-neutral-50);
+      margin-bottom: var(--space-3);
+    }
+    .logo-current__preview {
+      width: 56px; height: 56px;
+      background: var(--color-primary-600);
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: bold; font-size: 24px;
+      flex-shrink: 0;
+    }
+    .logo-current__info { flex: 1; }
+    .logo-current__name { font-weight: var(--font-weight-medium); margin-bottom: 3px; }
+    .logo-current__meta { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+
+    /* Team member row */
+    .member-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--color-neutral-100);
+    }
+    .member-row:last-child { border-bottom: none; }
+    .member-row__info { flex: 1; }
+    .member-row__name { font-weight: var(--font-weight-medium); font-size: var(--font-size-md); }
+    .member-row__email { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+
+    /* Tax rate row */
+    .tax-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--color-neutral-100);
+    }
+    .tax-row:last-child { border-bottom: none; }
+
+    /* Integration card */
+    .integration-card {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-4);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-white);
+      margin-bottom: var(--space-3);
+      transition: border-color var(--transition-fast);
+    }
+    .integration-card:hover { border-color: var(--color-primary-300); }
+    .integration-card__icon {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+      background: var(--color-neutral-100);
+    }
+    .integration-card__info { flex: 1; }
+    .integration-card__name { font-weight: var(--font-weight-semibold); }
+    .integration-card__desc { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-top: 2px; }
+
+    /* Danger zone */
+    .danger-zone {
+      border: 1px solid var(--color-danger-200);
+      border-radius: var(--radius-lg);
+      background: var(--color-danger-50);
+      padding: var(--space-5);
+    }
+    .danger-zone__title { font-size: var(--font-size-md); font-weight: var(--font-weight-semibold); color: var(--color-danger-700); margin-bottom: var(--space-3); }
+    .danger-zone__item { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-3); }
+    .danger-zone__item:last-child { margin-bottom: 0; }
+    .danger-zone__label { font-size: var(--font-size-md); font-weight: var(--font-weight-medium); color: var(--color-danger-700); }
+    .danger-zone__desc { font-size: var(--font-size-sm); color: var(--color-danger-500); margin-top: 2px; }
+
+    /* Saved indicator */
+    .saved-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--font-size-sm);
+      color: var(--color-success-600);
+      font-weight: var(--font-weight-medium);
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+    }
+    .saved-indicator--visible { opacity: 1; }
+
+    @media (max-width: 900px) {
+      .settings-layout { grid-template-columns: 1fr; }
+      .settings-subnav { display: none; }
+    }
+    @media (max-width: 767px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="dashboard.html" class="sidebar__brand">
+      <div class="sidebar__logo">Z</div>
+      <span class="sidebar__brand-name">Zephyr</span>
+    </a>
+    <nav class="sidebar__nav">
+      <a href="dashboard.html" class="nav-item"><span class="nav-item__icon">⊞</span>Dashboard</a>
+      <a href="contacts.html"  class="nav-item"><span class="nav-item__icon">👥</span>Contacts</a>
+      <a href="pipeline.html"  class="nav-item"><span class="nav-item__icon">📊</span>Pipeline</a>
+      <a href="invoices.html"  class="nav-item"><span class="nav-item__icon">📄</span>Invoices<span class="nav-item__badge">3</span></a>
+      <a href="settings.html"  class="nav-item nav-item--active"><span class="nav-item__icon">⚙</span>Settings</a>
+    </nav>
+    <div class="sidebar__bottom">
+      <div class="user-menu">
+        <div class="avatar avatar--md">SL</div>
+        <div style="flex:1;min-width:0;">
+          <div class="user-menu__name">Sarah Lee</div>
+          <div class="user-menu__email">sarah@zephyrco.io</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <span class="topbar__title">Settings</span>
+      <button class="search-trigger">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="m21 21-4.35-4.35"/></svg>
+        Search…
+        <kbd class="search-trigger__kbd">⌘K</kbd>
+      </button>
+      <div class="topbar__actions">
+        <button class="icon-btn">🔔<span class="notification-dot"></span></button>
+        <div class="avatar avatar--md" style="cursor:pointer;">SL</div>
+      </div>
+    </header>
+
+    <div class="settings-layout">
+
+      <!-- Settings Sub-Nav -->
+      <nav class="settings-subnav">
+        <div class="settings-subnav__group">
+          <div class="settings-subnav__label">Workspace</div>
+          <a class="settings-nav-item settings-nav-item--active" onclick="switchSection('workspace', this)">
+            <span class="settings-nav-item__icon">🏢</span> General
+          </a>
+          <a class="settings-nav-item" onclick="switchSection('team', this)">
+            <span class="settings-nav-item__icon">👥</span> Team
+          </a>
+          <a class="settings-nav-item" onclick="switchSection('invoicing', this)">
+            <span class="settings-nav-item__icon">📄</span> Invoicing
+          </a>
+        </div>
+        <div class="settings-subnav__group">
+          <div class="settings-subnav__label">Account</div>
+          <a class="settings-nav-item" onclick="switchSection('profile', this)">
+            <span class="settings-nav-item__icon">👤</span> Profile
+          </a>
+          <a class="settings-nav-item" onclick="switchSection('notifications', this)">
+            <span class="settings-nav-item__icon">🔔</span> Notifications
+          </a>
+        </div>
+        <div class="settings-subnav__group">
+          <div class="settings-subnav__label">Platform</div>
+          <a class="settings-nav-item" onclick="switchSection('integrations', this)">
+            <span class="settings-nav-item__icon">🔌</span> Integrations
+          </a>
+          <a class="settings-nav-item" onclick="switchSection('billing', this)">
+            <span class="settings-nav-item__icon">💳</span> Billing
+          </a>
+        </div>
+      </nav>
+
+      <!-- Settings Content -->
+      <div class="settings-content">
+
+        <!-- ===== WORKSPACE ===== -->
+        <div class="settings-panel settings-panel--active" id="panel-workspace">
+          <div class="settings-section">
+            <h2 class="settings-section__title">General</h2>
+            <p class="settings-section__desc">Workspace-wide settings visible to all team members.</p>
+
+            <div class="settings-card">
+              <div class="settings-card__header">Workspace Identity</div>
+              <div class="settings-card__body">
+                <div style="margin-bottom:var(--space-5);">
+                  <div class="form-field" style="margin-bottom:var(--space-3);">
+                    <label>Business Name</label>
+                    <input class="input" type="text" value="Zephyr Co." style="max-width:360px;" />
+                  </div>
+
+                  <div class="logo-current">
+                    <div class="logo-current__preview">Z</div>
+                    <div class="logo-current__info">
+                      <div class="logo-current__name">Zephyr Co. (initials)</div>
+                      <div class="logo-current__meta">No logo uploaded — using initials</div>
+                    </div>
+                    <button class="btn btn--secondary btn--sm">Upload Logo</button>
+                  </div>
+                </div>
+
+                <div class="settings-form-grid">
+                  <div class="form-field">
+                    <label>Default Currency</label>
+                    <select class="input">
+                      <option selected>USD — US Dollar</option>
+                      <option>EUR — Euro</option>
+                      <option>GBP — British Pound</option>
+                      <option>CAD — Canadian Dollar</option>
+                    </select>
+                  </div>
+                  <div class="form-field">
+                    <label>Timezone</label>
+                    <select class="input">
+                      <option>America/New_York (ET)</option>
+                      <option selected>America/Los_Angeles (PT)</option>
+                      <option>Europe/London (GMT)</option>
+                      <option>Europe/Berlin (CET)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-field" style="margin-bottom:var(--space-5);">
+                  <label>Business Address <span style="color:var(--color-text-secondary);font-weight:400;">(shown on invoices)</span></label>
+                  <input class="input" type="text" placeholder="123 Main St, Suite 100" style="max-width:360px;margin-bottom:var(--space-2);" value="123 Startup Lane, Suite 400" />
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2);max-width:360px;">
+                    <input class="input" type="text" value="San Francisco" />
+                    <input class="input" type="text" value="CA 94105" />
+                  </div>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:var(--space-3);">
+                  <button class="btn btn--primary" onclick="showSaved()">Save Changes</button>
+                  <span class="saved-indicator" id="savedIndicator">✓ Saved</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card__header">Danger Zone</div>
+              <div class="settings-card__body">
+                <div class="danger-zone">
+                  <div class="danger-zone__title">⚠ Irreversible Actions</div>
+                  <div class="danger-zone__item">
+                    <div>
+                      <div class="danger-zone__label">Delete Workspace</div>
+                      <div class="danger-zone__desc">Permanently delete this workspace and all data. Cannot be undone.</div>
+                    </div>
+                    <button class="btn btn--danger btn--sm">Delete Workspace</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== TEAM ===== -->
+        <div class="settings-panel" id="panel-team">
+          <div class="settings-section">
+            <h2 class="settings-section__title">Team</h2>
+            <p class="settings-section__desc">Manage team members and their access levels.</p>
+
+            <div class="settings-card">
+              <div class="settings-card__header" style="display:flex;align-items:center;justify-content:space-between;">
+                Members (3)
+                <button class="btn btn--primary btn--sm">Invite Member</button>
+              </div>
+              <div class="settings-card__body">
+                <div class="member-row">
+                  <div class="avatar avatar--md">SL</div>
+                  <div class="member-row__info">
+                    <div class="member-row__name">Sarah Lee <span class="badge badge--sent" style="font-size:10px;margin-left:6px;">You</span></div>
+                    <div class="member-row__email">sarah@zephyrco.io</div>
+                  </div>
+                  <select class="input" style="max-width:120px;font-size:var(--font-size-sm);">
+                    <option selected>Admin</option>
+                    <option>Member</option>
+                    <option>Viewer</option>
+                  </select>
+                  <button class="btn btn--ghost btn--sm" style="opacity:0.4;cursor:not-allowed;" disabled>Remove</button>
+                </div>
+                <div class="member-row">
+                  <div class="avatar avatar--md" style="background:var(--color-success-50);color:var(--color-success-700);">JK</div>
+                  <div class="member-row__info">
+                    <div class="member-row__name">Jamie Kim</div>
+                    <div class="member-row__email">jamie@zephyrco.io</div>
+                  </div>
+                  <select class="input" style="max-width:120px;font-size:var(--font-size-sm);">
+                    <option>Admin</option>
+                    <option selected>Member</option>
+                    <option>Viewer</option>
+                  </select>
+                  <button class="btn btn--ghost btn--sm" style="color:var(--color-danger-600);">Remove</button>
+                </div>
+                <div class="member-row">
+                  <div class="avatar avatar--md" style="background:var(--color-warning-50);color:var(--color-warning-700);">RP</div>
+                  <div class="member-row__info">
+                    <div class="member-row__name">Ryan Park</div>
+                    <div class="member-row__email">ryan@zephyrco.io</div>
+                  </div>
+                  <select class="input" style="max-width:120px;font-size:var(--font-size-sm);">
+                    <option>Admin</option>
+                    <option>Member</option>
+                    <option selected>Viewer</option>
+                  </select>
+                  <button class="btn btn--ghost btn--sm" style="color:var(--color-danger-600);">Remove</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card__header">Pending Invites (1)</div>
+              <div class="settings-card__body">
+                <div class="member-row">
+                  <div class="avatar avatar--md" style="background:var(--color-neutral-100);color:var(--color-neutral-400);">?</div>
+                  <div class="member-row__info">
+                    <div class="member-row__name">alex@designco.io <span class="badge badge--draft" style="font-size:10px;margin-left:6px;">Pending</span></div>
+                    <div class="member-row__email">Invited 2 days ago · Member</div>
+                  </div>
+                  <button class="btn btn--secondary btn--sm">Resend</button>
+                  <button class="btn btn--ghost btn--sm" style="color:var(--color-danger-600);">Revoke</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== INVOICING ===== -->
+        <div class="settings-panel" id="panel-invoicing">
+          <div class="settings-section">
+            <h2 class="settings-section__title">Invoicing</h2>
+            <p class="settings-section__desc">Defaults applied to every new invoice.</p>
+
+            <div class="settings-card">
+              <div class="settings-card__header">Invoice Defaults</div>
+              <div class="settings-card__body">
+                <div class="settings-row">
+                  <div class="settings-row__info">
+                    <div class="settings-row__label">Invoice Number Prefix</div>
+                    <div class="settings-row__desc">Prefix for auto-generated invoice numbers. E.g. <code style="font-family:var(--font-family-mono);font-size:12px;background:var(--color-neutral-100);padding:1px 4px;border-radius:2px;">INV-0001</code></div>
+                  </div>
+                  <div class="settings-row__control">
+                    <input class="input" type="text" value="INV-" style="max-width:120px;font-family:var(--font-family-mono);" />
+                  </div>
+                </div>
+                <div class="settings-row">
+                  <div class="settings-row__info">
+                    <div class="settings-row__label">Default Payment Terms</div>
+                    <div class="settings-row__desc">Applied to new invoices unless overridden</div>
+                  </div>
+                  <div class="settings-row__control">
+                    <select class="input">
+                      <option>Net 7</option>
+                      <option>Net 14</option>
+                      <option selected>Net 30</option>
+                      <option>Net 60</option>
+                      <option>Due on receipt</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="settings-row">
+                  <div class="settings-row__info">
+                    <div class="settings-row__label">Default Invoice Notes</div>
+                    <div class="settings-row__desc">Pre-filled in the notes field on new invoices</div>
+                  </div>
+                  <div class="settings-row__control">
+                    <textarea class="input" rows="3" style="resize:vertical;width:100%;">Thank you for your business. Please include the invoice number when making payment.</textarea>
+                  </div>
+                </div>
+                <div class="settings-row" style="border-bottom:none;">
+                  <div class="settings-row__info">
+                    <div class="settings-row__label">Late Payment Reminders</div>
+                    <div class="settings-row__desc">Automatically send reminders for overdue invoices</div>
+                  </div>
+                  <div class="settings-row__control" style="display:flex;align-items:center;gap:var(--space-3);">
+                    <label class="toggle">
+                      <input type="checkbox" checked />
+                      <div class="toggle-track"></div>
+                    </label>
+                    <span style="font-size:var(--font-size-sm);color:var(--color-text-secondary);">Enabled</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card__header" style="display:flex;align-items:center;justify-content:space-between;">
+                Tax Rates
+                <button class="btn btn--secondary btn--sm">+ Add Rate</button>
+              </div>
+              <div class="settings-card__body">
+                <div class="tax-row">
+                  <div style="flex:1;"><div style="font-weight:var(--font-weight-medium);">Sales Tax (CA)</div><div style="font-size:var(--font-size-sm);color:var(--color-text-secondary);">California state sales tax</div></div>
+                  <div style="font-family:var(--font-family-mono);font-weight:var(--font-weight-semibold);min-width:60px;text-align:right;">8.50%</div>
+                  <button class="btn btn--ghost btn--sm" style="margin-left:var(--space-3);">Edit</button>
+                  <button class="btn btn--ghost btn--sm" style="color:var(--color-danger-600);">✕</button>
+                </div>
+                <div class="tax-row">
+                  <div style="flex:1;"><div style="font-weight:var(--font-weight-medium);">No Tax</div><div style="font-size:var(--font-size-sm);color:var(--color-text-secondary);">0% — for tax-exempt clients</div></div>
+                  <div style="font-family:var(--font-family-mono);font-weight:var(--font-weight-semibold);min-width:60px;text-align:right;">0.00%</div>
+                  <button class="btn btn--ghost btn--sm" style="margin-left:var(--space-3);">Edit</button>
+                  <button class="btn btn--ghost btn--sm" style="color:var(--color-danger-600);opacity:0.4;" disabled>✕</button>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:var(--space-3);">
+              <button class="btn btn--primary" onclick="showSaved()">Save Changes</button>
+              <span class="saved-indicator" id="savedIndicator2">✓ Saved</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== PROFILE ===== -->
+        <div class="settings-panel" id="panel-profile">
+          <div class="settings-section">
+            <h2 class="settings-section__title">Profile</h2>
+            <p class="settings-section__desc">Your personal account settings.</p>
+
+            <div class="settings-card">
+              <div class="settings-card__header">Personal Info</div>
+              <div class="settings-card__body">
+                <div style="display:flex;align-items:center;gap:var(--space-4);margin-bottom:var(--space-5);">
+                  <div class="avatar avatar--xl">SL</div>
+                  <div>
+                    <button class="btn btn--secondary btn--sm">Change Photo</button>
+                    <div style="font-size:var(--font-size-sm);color:var(--color-text-secondary);margin-top:var(--space-2);">JPG, PNG or GIF — up to 2MB</div>
+                  </div>
+                </div>
+
+                <div class="settings-form-grid">
+                  <div class="form-field">
+                    <label>First Name</label>
+                    <input class="input" type="text" value="Sarah" />
+                  </div>
+                  <div class="form-field">
+                    <label>Last Name</label>
+                    <input class="input" type="text" value="Lee" />
+                  </div>
+                </div>
+
+                <div class="form-field" style="margin-bottom:var(--space-4);">
+                  <label>Email</label>
+                  <input class="input" type="email" value="sarah@zephyrco.io" style="max-width:360px;" />
+                </div>
+
+                <button class="btn btn--primary" onclick="showSaved()">Save Profile</button>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card__header">Change Password</div>
+              <div class="settings-card__body">
+                <div class="form-field" style="margin-bottom:var(--space-4);max-width:360px;">
+                  <label>Current Password</label>
+                  <input class="input" type="password" placeholder="••••••••" />
+                </div>
+                <div class="form-field" style="margin-bottom:var(--space-4);max-width:360px;">
+                  <label>New Password</label>
+                  <input class="input" type="password" placeholder="••••••••" />
+                </div>
+                <div class="form-field" style="margin-bottom:var(--space-5);max-width:360px;">
+                  <label>Confirm New Password</label>
+                  <input class="input" type="password" placeholder="••••••••" />
+                </div>
+                <button class="btn btn--secondary">Update Password</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== NOTIFICATIONS ===== -->
+        <div class="settings-panel" id="panel-notifications">
+          <div class="settings-section">
+            <h2 class="settings-section__title">Notifications</h2>
+            <p class="settings-section__desc">Choose what updates you receive and how.</p>
+
+            <div class="settings-card">
+              <div class="settings-card__header">Email Notifications</div>
+              <div class="settings-card__body">
+                <div class="settings-row">
+                  <div class="settings-row__info"><div class="settings-row__label">Invoice paid</div><div class="settings-row__desc">When a client pays an invoice</div></div>
+                  <label class="toggle"><input type="checkbox" checked /><div class="toggle-track"></div></label>
+                </div>
+                <div class="settings-row">
+                  <div class="settings-row__info"><div class="settings-row__label">Invoice viewed</div><div class="settings-row__desc">When a client opens a sent invoice</div></div>
+                  <label class="toggle"><input type="checkbox" checked /><div class="toggle-track"></div></label>
+                </div>
+                <div class="settings-row">
+                  <div class="settings-row__info"><div class="settings-row__label">Overdue reminder</div><div class="settings-row__desc">When an invoice becomes overdue</div></div>
+                  <label class="toggle"><input type="checkbox" checked /><div class="toggle-track"></div></label>
+                </div>
+                <div class="settings-row">
+                  <div class="settings-row__info"><div class="settings-row__label">Deal stale alert</div><div class="settings-row__desc">When a deal has no activity for 7+ days</div></div>
+                  <label class="toggle"><input type="checkbox" /><div class="toggle-track"></div></label>
+                </div>
+                <div class="settings-row" style="border-bottom:none;">
+                  <div class="settings-row__info"><div class="settings-row__label">Team member joined</div><div class="settings-row__desc">When a new team member accepts an invite</div></div>
+                  <label class="toggle"><input type="checkbox" checked /><div class="toggle-track"></div></label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== INTEGRATIONS ===== -->
+        <div class="settings-panel" id="panel-integrations">
+          <div class="settings-section">
+            <h2 class="settings-section__title">Integrations</h2>
+            <p class="settings-section__desc">Connect external services to power your workflow.</p>
+
+            <div class="integration-card">
+              <div class="integration-card__icon" style="background:#F0FDF4;font-size:24px;">💳</div>
+              <div class="integration-card__info">
+                <div class="integration-card__name">Stripe</div>
+                <div class="integration-card__desc">Accept payments via card, ACH, or Apple Pay on your invoices</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:var(--space-3);">
+                <span class="badge badge--paid">Connected</span>
+                <button class="btn btn--secondary btn--sm">Configure</button>
+              </div>
+            </div>
+
+            <div style="padding:var(--space-4);background:var(--color-success-50);border:1px solid #BBF7D0;border-radius:var(--radius-md);margin-bottom:var(--space-4);">
+              <div style="font-size:var(--font-size-sm);font-weight:var(--font-weight-semibold);color:var(--color-success-700);margin-bottom:var(--space-2);">✓ Stripe Connected</div>
+              <div style="font-size:var(--font-size-sm);color:var(--color-success-600);">Account: Zephyr Co. (acct_1NxQ3ABcDeFgHi12)</div>
+              <div style="font-size:var(--font-size-sm);color:var(--color-success-600);">Mode: Live · Processing enabled</div>
+            </div>
+
+            <div class="integration-card">
+              <div class="integration-card__icon">📬</div>
+              <div class="integration-card__info">
+                <div class="integration-card__name">Gmail / Google Workspace</div>
+                <div class="integration-card__desc">Send emails and log replies directly from Zephyr</div>
+              </div>
+              <button class="btn btn--secondary btn--sm">Connect</button>
+            </div>
+
+            <div class="integration-card">
+              <div class="integration-card__icon">🔗</div>
+              <div class="integration-card__info">
+                <div class="integration-card__name">Webhooks</div>
+                <div class="integration-card__desc">Send real-time event data to your own endpoints</div>
+              </div>
+              <button class="btn btn--secondary btn--sm">Configure</button>
+            </div>
+
+            <div style="padding:var(--space-4);background:var(--color-neutral-50);border:1px solid var(--color-border);border-radius:var(--radius-md);margin-top:var(--space-4);">
+              <div style="font-size:var(--font-size-sm);font-weight:var(--font-weight-semibold);margin-bottom:var(--space-2);">Webhook Endpoint URL</div>
+              <div style="display:flex;gap:var(--space-2);">
+                <input class="input" type="text" value="https://hooks.zapier.com/hooks/catch/abc123" readonly style="font-family:var(--font-family-mono);font-size:12px;background:var(--color-white);" />
+                <button class="btn btn--secondary btn--sm">Copy</button>
+              </div>
+              <div style="font-size:11px;color:var(--color-text-secondary);margin-top:var(--space-2);">Events: invoice.paid, invoice.sent, deal.stage_changed, contact.created</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== BILLING ===== -->
+        <div class="settings-panel" id="panel-billing">
+          <div class="settings-section">
+            <h2 class="settings-section__title">Billing</h2>
+            <p class="settings-section__desc">Your subscription and payment method.</p>
+
+            <div class="settings-card">
+              <div class="settings-card__header">Current Plan</div>
+              <div class="settings-card__body">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--space-5);background:linear-gradient(135deg,var(--color-primary-600),#3730A3);border-radius:var(--radius-lg);color:white;margin-bottom:var(--space-5);">
+                  <div>
+                    <div style="font-size:var(--font-size-xl);font-weight:var(--font-weight-bold);margin-bottom:4px;">Pro Plan</div>
+                    <div style="font-size:var(--font-size-sm);opacity:0.8;">Unlimited contacts, deals, and invoices</div>
+                  </div>
+                  <div style="text-align:right;">
+                    <div style="font-size:28px;font-weight:var(--font-weight-bold);font-family:var(--font-family-mono);">$29</div>
+                    <div style="font-size:var(--font-size-sm);opacity:0.8;">/ month</div>
+                  </div>
+                </div>
+
+                <div style="display:flex;justify-content:space-between;font-size:var(--font-size-sm);color:var(--color-text-secondary);margin-bottom:var(--space-4);">
+                  <span>Next billing date: <strong style="color:var(--color-text-primary);">May 1, 2026</strong></span>
+                  <a href="#" style="color:var(--color-primary-600);text-decoration:none;">View invoice history</a>
+                </div>
+
+                <div style="display:flex;gap:var(--space-3);">
+                  <button class="btn btn--secondary">Change Plan</button>
+                  <button class="btn btn--ghost" style="color:var(--color-danger-600);">Cancel Subscription</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card__header" style="display:flex;align-items:center;justify-content:space-between;">
+                Payment Method
+                <button class="btn btn--secondary btn--sm">Update</button>
+              </div>
+              <div class="settings-card__body">
+                <div style="display:flex;align-items:center;gap:var(--space-4);padding:var(--space-4);background:var(--color-neutral-50);border:1px solid var(--color-border);border-radius:var(--radius-md);">
+                  <div style="width:44px;height:28px;background:var(--color-primary-600);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:10px;flex-shrink:0;">VISA</div>
+                  <div>
+                    <div style="font-weight:var(--font-weight-medium);">Visa ending in 4242</div>
+                    <div style="font-size:var(--font-size-sm);color:var(--color-text-secondary);">Expires 08/2028</div>
+                  </div>
+                  <span class="badge badge--paid" style="margin-left:auto;">Default</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /settings-content -->
+    </div><!-- /settings-layout -->
+  </div>
+</div>
+
+<script>
+  function switchSection(name, el) {
+    document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('settings-panel--active'));
+    document.querySelectorAll('.settings-nav-item').forEach(n => n.classList.remove('settings-nav-item--active'));
+    document.getElementById('panel-' + name).classList.add('settings-panel--active');
+    el.classList.add('settings-nav-item--active');
+  }
+
+  function showSaved() {
+    const indicators = document.querySelectorAll('.saved-indicator');
+    indicators.forEach(el => {
+      el.classList.add('saved-indicator--visible');
+      setTimeout(() => el.classList.remove('saved-indicator--visible'), 2500);
+    });
+  }
+</script>
+</body>
+</html>
