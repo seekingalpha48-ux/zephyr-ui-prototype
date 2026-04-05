@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>New Invoice — Unified Operating Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="design-tokens.css" />
+  <style>
+    /* SHARED SHELL */
+    .app-shell { display: flex; min-height: 100vh; }
+    .sidebar { width: var(--sidebar-width); background: var(--color-bg-sidebar); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: var(--z-sticky); overflow-y: auto; }
+    .sidebar__brand { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-5) var(--space-4); border-bottom: 1px solid var(--color-border); text-decoration: none; flex-shrink: 0; }
+    .sidebar__logo { width: 32px; height: 32px; background: var(--color-primary-600); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; color: white; font-weight: var(--font-weight-bold); font-size: 15px; flex-shrink: 0; }
+    .sidebar__brand-name { font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
+    .sidebar__nav { flex: 1; padding: var(--space-3) var(--space-2); }
+    .nav-item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); color: var(--color-text-secondary); text-decoration: none; font-size: var(--font-size-md); font-weight: var(--font-weight-medium); transition: background-color var(--transition-fast), color var(--transition-fast); cursor: pointer; }
+    .nav-item:hover { background: var(--color-neutral-100); color: var(--color-text-primary); }
+    .nav-item--active { background: var(--color-primary-50); color: var(--color-primary-700); }
+    .nav-item__icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 17px; }
+    .nav-item__badge { margin-left: auto; background: var(--color-danger-600); color: white; border-radius: var(--radius-full); font-size: 10px; font-weight: var(--font-weight-semibold); padding: 1px 6px; }
+    .sidebar__bottom { border-top: 1px solid var(--color-border); padding: var(--space-3) var(--space-2); }
+    .user-menu { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); cursor: pointer; }
+    .user-menu:hover { background: var(--color-neutral-100); }
+    .user-menu__name { font-size: var(--font-size-md); font-weight: var(--font-weight-medium); color: var(--color-text-primary); }
+    .user-menu__email { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+    .main { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; background: var(--color-bg-page); }
+    .topbar { height: var(--topbar-height); background: var(--color-bg-card); border-bottom: 1px solid var(--color-border); display: flex; align-items: center; gap: var(--space-4); padding: 0 var(--page-padding-x); position: sticky; top: 0; z-index: calc(var(--z-sticky) - 1); flex-shrink: 0; }
+    .topbar__title { font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); color: var(--color-text-primary); flex: 1; }
+    .topbar__actions { display: flex; align-items: center; gap: var(--space-2); }
+    .icon-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); border: none; background: transparent; color: var(--color-text-secondary); cursor: pointer; font-size: 18px; transition: background-color var(--transition-fast); position: relative; }
+    .notification-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background: var(--color-danger-600); border-radius: var(--radius-full); border: 2px solid var(--color-bg-card); }
+    .search-trigger { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); background: var(--color-neutral-100); border: 1px solid var(--color-border); border-radius: var(--radius-md); color: var(--color-text-secondary); font-size: var(--font-size-md); cursor: pointer; min-width: 240px; }
+    .search-trigger__kbd { margin-left: auto; font-size: var(--font-size-xs); background: var(--color-white); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 1px 5px; color: var(--color-text-placeholder); }
+
+    /* ===== INVOICE CREATE ===== */
+    .page { padding: var(--space-6) var(--page-padding-x); flex: 1; }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-6);
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+    .breadcrumb a { color: var(--color-text-link); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .breadcrumb__sep { color: var(--color-neutral-400); }
+
+    .page-title {
+      font-size: var(--font-size-3xl);
+      font-weight: var(--font-weight-bold);
+      margin-top: var(--space-1);
+    }
+
+    /* Two-column layout */
+    .invoice-layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: var(--space-6);
+      align-items: flex-start;
+    }
+
+    .invoice-form { display: flex; flex-direction: column; gap: var(--space-5); }
+
+    /* Sections */
+    .form-section {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .form-section__header {
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-neutral-50);
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+    }
+
+    .form-section__body {
+      padding: var(--space-5);
+    }
+
+    /* From / To */
+    .from-to-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-5);
+    }
+
+    .from-block, .to-block {}
+
+    .from-block__label, .to-block__label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: var(--space-3);
+    }
+
+    .from-block__name {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+      margin-bottom: 4px;
+    }
+
+    .from-block__address {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    .client-selector {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      background: var(--color-white);
+      transition: border-color var(--transition-fast);
+      font-size: var(--font-size-md);
+    }
+    .client-selector:hover { border-color: var(--color-primary-400); }
+    .client-selector--selected { border-color: var(--color-primary-400); background: var(--color-primary-50); }
+    .client-selector__placeholder { color: var(--color-text-placeholder); flex: 1; }
+    .client-selector__name { color: var(--color-text-primary); font-weight: var(--font-weight-medium); flex: 1; }
+    .client-selector__change { font-size: var(--font-size-sm); color: var(--color-text-link); }
+
+    /* Invoice meta */
+    .invoice-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-4);
+    }
+
+    .form-field { display: flex; flex-direction: column; gap: var(--space-1); }
+    .form-field label { font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); color: var(--color-text-secondary); }
+    .form-field .hint { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-top: 2px; }
+
+    select.input {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' viewBox='0 0 24 24' stroke='%239CA3AF' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 30px;
+      cursor: pointer;
+    }
+
+    /* Line items table */
+    .line-items-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .line-items-table thead th {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+      text-align: left;
+      padding: var(--space-2) var(--space-3);
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-neutral-50);
+    }
+
+    .line-items-table thead th:last-child { text-align: right; }
+    .line-items-table thead th.num { text-align: right; }
+
+    .line-items-table tbody tr { border-bottom: 1px solid var(--color-neutral-100); }
+    .line-items-table tbody tr:last-child { border-bottom: none; }
+
+    .line-items-table td {
+      padding: var(--space-2) var(--space-3);
+      vertical-align: middle;
+    }
+
+    .line-input {
+      display: block;
+      width: 100%;
+      padding: 6px var(--space-2);
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-family-base);
+      font-size: var(--font-size-md);
+      color: var(--color-text-primary);
+      background: transparent;
+      outline: none;
+      transition: border-color var(--transition-fast), background-color var(--transition-fast);
+    }
+    .line-input:focus { border-color: var(--color-primary-400); background: white; box-shadow: 0 0 0 2px rgba(79,70,229,0.1); }
+    .line-input:hover:not(:focus) { border-color: var(--color-border); background: var(--color-neutral-50); }
+    .line-input.text-right { text-align: right; }
+    .line-input.mono { font-family: var(--font-family-mono); }
+
+    .line-total {
+      font-family: var(--font-family-mono);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+      text-align: right;
+      padding-right: var(--space-3);
+      font-size: var(--font-size-md);
+    }
+
+    .delete-row-btn {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      font-size: 16px;
+      opacity: 0;
+      transition: opacity var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast);
+    }
+    .line-items-table tbody tr:hover .delete-row-btn { opacity: 1; }
+    .delete-row-btn:hover { background: var(--color-danger-50); color: var(--color-danger-600); }
+
+    .add-line-row { padding: var(--space-3) var(--space-3); }
+
+    /* Notes */
+    .notes-area {
+      width: 100%;
+      padding: var(--space-3);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      font-family: var(--font-family-base);
+      font-size: var(--font-size-md);
+      color: var(--color-text-primary);
+      resize: vertical;
+      outline: none;
+      min-height: 80px;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    .notes-area:focus { border-color: var(--color-primary-600); box-shadow: 0 0 0 3px rgba(79,70,229,0.12); }
+
+    /* ===== SUMMARY PANEL (sticky) ===== */
+    .summary-panel {
+      position: sticky;
+      top: calc(var(--topbar-height) + var(--space-6));
+    }
+
+    .summary-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .summary-card__header {
+      padding: var(--space-4) var(--space-5);
+      background: var(--color-neutral-50);
+      border-bottom: 1px solid var(--color-border);
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    .summary-rows { padding: var(--space-4) var(--space-5); display: flex; flex-direction: column; gap: var(--space-3); }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: var(--font-size-md);
+    }
+
+    .summary-row__label { color: var(--color-text-secondary); }
+    .summary-row__value { font-family: var(--font-family-mono); font-weight: var(--font-weight-medium); color: var(--color-text-primary); }
+    .summary-row__value--discount { color: var(--color-success-600); }
+    .summary-row__value--tax { color: var(--color-text-secondary); }
+
+    .summary-total {
+      margin: 0 var(--space-5) var(--space-5);
+      background: var(--color-primary-600);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .summary-total__label { color: white; font-size: var(--font-size-md); font-weight: var(--font-weight-semibold); }
+    .summary-total__value { color: white; font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); font-family: var(--font-family-mono); }
+
+    .summary-actions {
+      padding: 0 var(--space-5) var(--space-5);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .summary-actions .btn { width: 100%; justify-content: center; }
+
+    .payment-terms-note {
+      margin: 0 var(--space-5) var(--space-4);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      text-align: center;
+    }
+
+    .preview-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-link);
+      cursor: pointer;
+      padding: var(--space-2);
+    }
+    .preview-link:hover { text-decoration: underline; }
+
+    @media (max-width: 1024px) {
+      .invoice-layout { grid-template-columns: 1fr; }
+      .summary-panel { position: static; }
+    }
+    @media (max-width: 767px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+      .from-to-grid, .invoice-meta-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="dashboard.html" class="sidebar__brand">
+      <div class="sidebar__logo">Z</div>
+      <span class="sidebar__brand-name">Zephyr</span>
+    </a>
+    <nav class="sidebar__nav">
+      <a href="dashboard.html" class="nav-item"><span class="nav-item__icon">⊞</span>Dashboard</a>
+      <a href="contacts.html" class="nav-item"><span class="nav-item__icon">👥</span>Contacts</a>
+      <a href="pipeline.html" class="nav-item"><span class="nav-item__icon">📊</span>Pipeline</a>
+      <a href="invoices.html" class="nav-item nav-item--active"><span class="nav-item__icon">📄</span>Invoices<span class="nav-item__badge">3</span></a>
+      <a href="#" class="nav-item" style="margin-top:var(--space-4);"><span class="nav-item__icon">⚙</span>Settings</a>
+    </nav>
+    <div class="sidebar__bottom">
+      <div class="user-menu">
+        <div class="avatar avatar--md">SL</div>
+        <div style="flex:1;min-width:0;">
+          <div class="user-menu__name">Sarah Lee</div>
+          <div class="user-menu__email">sarah@zephyrco.io</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <span class="topbar__title">New Invoice</span>
+      <button class="search-trigger">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="m21 21-4.35-4.35"/></svg>
+        Search…
+        <kbd class="search-trigger__kbd">⌘K</kbd>
+      </button>
+      <div class="topbar__actions">
+        <button class="icon-btn">🔔<span class="notification-dot"></span></button>
+        <div class="avatar avatar--md" style="cursor:pointer;">SL</div>
+      </div>
+    </header>
+
+    <main class="page">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb">
+            <a href="invoices.html">Invoices</a>
+            <span class="breadcrumb__sep">/</span>
+            New Invoice
+          </div>
+          <h1 class="page-title">New Invoice</h1>
+        </div>
+        <div style="display:flex;gap:var(--space-2);">
+          <button class="btn btn--secondary" onclick="window.location='invoices.html'">Discard</button>
+          <button class="btn btn--secondary">Save as Draft</button>
+          <button class="btn btn--primary" onclick="handleSend()">Send Invoice →</button>
+        </div>
+      </div>
+
+      <div class="invoice-layout">
+        <!-- LEFT: FORM -->
+        <div class="invoice-form">
+
+          <!-- From / To -->
+          <div class="form-section">
+            <div class="form-section__header">From &amp; To</div>
+            <div class="form-section__body">
+              <div class="from-to-grid">
+                <!-- From (workspace) -->
+                <div class="from-block">
+                  <div class="from-block__label">From</div>
+                  <div style="display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-2);">
+                    <div style="width:40px;height:40px;background:var(--color-primary-600);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:16px;flex-shrink:0;">Z</div>
+                    <div>
+                      <div class="from-block__name">Zephyr Co.</div>
+                      <div style="font-size:var(--font-size-sm);color:var(--color-text-link);cursor:pointer;">Edit workspace</div>
+                    </div>
+                  </div>
+                  <div class="from-block__address">
+                    123 Startup Lane, Suite 400<br>
+                    San Francisco, CA 94105<br>
+                    sarah@zephyrco.io
+                  </div>
+                </div>
+
+                <!-- Bill To (client) -->
+                <div class="to-block">
+                  <div class="to-block__label">Bill To</div>
+                  <div class="client-selector client-selector--selected" id="clientSelector" onclick="toggleClient()">
+                    <div class="avatar avatar--md" style="background:var(--color-success-50);color:var(--color-success-700);">TP</div>
+                    <div style="flex:1;">
+                      <div class="client-selector__name">Thomas Park</div>
+                      <div style="font-size:var(--font-size-sm);color:var(--color-text-secondary);">Vela Systems · t.park@velasystems.co</div>
+                    </div>
+                    <span class="client-selector__change">Change →</span>
+                  </div>
+                  <div style="margin-top:var(--space-3);font-size:var(--font-size-sm);color:var(--color-text-secondary);line-height:1.6;">
+                    Vela Systems Inc.<br>
+                    88 Mission Blvd<br>
+                    Chicago, IL 60601
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Invoice Details -->
+          <div class="form-section">
+            <div class="form-section__header">Invoice Details</div>
+            <div class="form-section__body">
+              <div class="invoice-meta-grid">
+                <div class="form-field">
+                  <label for="invNum">Invoice Number</label>
+                  <input id="invNum" class="input text-mono" type="text" value="INV-0051" />
+                  <span class="hint">Auto-generated</span>
+                </div>
+                <div class="form-field">
+                  <label for="issueDate">Issue Date</label>
+                  <input id="issueDate" class="input" type="date" value="2026-04-04" />
+                </div>
+                <div class="form-field">
+                  <label for="terms">Payment Terms</label>
+                  <select id="terms" class="input" onchange="updateDue()">
+                    <option value="7">Net 7</option>
+                    <option value="14">Net 14</option>
+                    <option value="30" selected>Net 30</option>
+                    <option value="60">Net 60</option>
+                    <option value="0">Due on receipt</option>
+                    <option value="custom">Custom date</option>
+                  </select>
+                </div>
+              </div>
+              <div style="margin-top:var(--space-4);">
+                <div class="form-field">
+                  <label>Due Date</label>
+                  <input id="dueDate" class="input" type="date" value="2026-05-04" style="max-width:200px;" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Line Items -->
+          <div class="form-section">
+            <div class="form-section__header" style="display:flex;align-items:center;justify-content:space-between;">
+              Line Items
+              <button class="btn btn--ghost btn--sm">📋 Load Template</button>
+            </div>
+            <div class="form-section__body" style="padding:0;">
+              <table class="line-items-table" id="lineTable">
+                <thead>
+                  <tr>
+                    <th style="width:40%;">Description</th>
+                    <th class="num" style="width:10%;">Qty</th>
+                    <th class="num" style="width:15%;">Unit Price</th>
+                    <th class="num" style="width:10%;">Tax %</th>
+                    <th class="num" style="width:10%;">Disc %</th>
+                    <th style="width:12%;text-align:right;">Total</th>
+                    <th style="width:3%;"></th>
+                  </tr>
+                </thead>
+                <tbody id="lineItems">
+                  <tr>
+                    <td><input class="line-input" type="text" value="Monthly Retainer — April 2026" placeholder="Description" /></td>
+                    <td><input class="line-input text-right mono" type="number" value="1" min="0" step="1" onchange="recalc()" /></td>
+                    <td><input class="line-input text-right mono" type="number" value="8400" min="0" step="0.01" onchange="recalc()" /></td>
+                    <td><input class="line-input text-right mono" type="number" value="0" min="0" max="100" step="0.01" onchange="recalc()" /></td>
+                    <td><input class="line-input text-right mono" type="number" value="0" min="0" max="100" step="0.01" onchange="recalc()" /></td>
+                    <td class="line-total" data-total="8400">$8,400.00</td>
+                    <td><button class="delete-row-btn" onclick="deleteRow(this)" title="Remove line">✕</button></td>
+                  </tr>
+                  <tr>
+                    <td><input class="line-input" type="text" value="Setup &amp; Onboarding (one-time)" placeholder="Description" /></td>
+                    <td><input class="line-input text-right mono" type="number" value="1" min="0" step="1" onchange="recalc()" /></td>
+                    <td><input class="line-input text-right mono" type="number" value="1200" min="0" step="0.01" onchange="recalc()" /></td>
+                    <td><input class="line-input text-right mono" type="number" value="0" min="0" max="100" step="0.01" onchange="recalc()" /></td>
+                    <td><input class="line-input text-right mono" type="number" value="10" min="0" max="100" step="0.01" onchange="recalc()" /></td>
+                    <td class="line-total" data-total="1080">$1,080.00</td>
+                    <td><button class="delete-row-btn" onclick="deleteRow(this)" title="Remove line">✕</button></td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="add-line-row">
+                <button class="btn btn--ghost btn--sm" onclick="addRow()">+ Add line item</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notes & Terms -->
+          <div class="form-section">
+            <div class="form-section__header">Notes &amp; Terms (optional)</div>
+            <div class="form-section__body">
+              <div class="form-field">
+                <label for="invNotes">Invoice Notes</label>
+                <textarea id="invNotes" class="notes-area" placeholder="Thank you for your business. Please include the invoice number when making payment.">Thank you for your business. Payment can be made via bank transfer or the secure online link included in this invoice.</textarea>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT: SUMMARY PANEL -->
+        <div class="summary-panel">
+          <div class="summary-card">
+            <div class="summary-card__header">Invoice Summary</div>
+            <div class="summary-rows">
+              <div class="summary-row">
+                <span class="summary-row__label">Subtotal</span>
+                <span class="summary-row__value" id="subtotal">$9,600.00</span>
+              </div>
+              <div class="summary-row">
+                <span class="summary-row__label">Discount</span>
+                <span class="summary-row__value summary-row__value--discount" id="discountTotal">−$120.00</span>
+              </div>
+              <div class="summary-row">
+                <span class="summary-row__label">Tax</span>
+                <span class="summary-row__value summary-row__value--tax" id="taxTotal">$0.00</span>
+              </div>
+            </div>
+            <div class="summary-total">
+              <span class="summary-total__label">Total Due</span>
+              <span class="summary-total__value" id="totalDue">$9,480.00</span>
+            </div>
+            <div class="payment-terms-note">Due <strong id="dueDateDisplay">May 4, 2026</strong> (Net 30)</div>
+            <div class="summary-actions">
+              <button class="btn btn--primary btn--lg" onclick="handleSend()">Send Invoice →</button>
+              <button class="btn btn--secondary">Save as Draft</button>
+              <div class="preview-link" onclick="window.open('invoice-preview.html','_blank')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                Preview invoice
+              </div>
+            </div>
+          </div>
+
+          <!-- Delivery note -->
+          <div style="margin-top:var(--space-4);padding:var(--space-4);background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);">
+            <div style="font-size:var(--font-size-sm);font-weight:var(--font-weight-semibold);color:var(--color-text-primary);margin-bottom:var(--space-2);">Delivery</div>
+            <div style="font-size:var(--font-size-sm);color:var(--color-text-secondary);margin-bottom:var(--space-3);">Will be sent to:</div>
+            <div style="display:flex;align-items:center;gap:var(--space-2);font-size:var(--font-size-sm);color:var(--color-text-primary);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              t.park@velasystems.co
+            </div>
+            <div style="margin-top:var(--space-3);">
+              <label style="display:flex;align-items:center;gap:var(--space-2);cursor:pointer;font-size:var(--font-size-sm);color:var(--color-text-secondary);">
+                <input type="checkbox" checked style="accent-color:var(--color-primary-600);" />
+                Include payment link (Stripe)
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+  function fmt(n) {
+    return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  function recalc() {
+    const rows = document.querySelectorAll('#lineItems tr');
+    let subtotal = 0, discTotal = 0, taxTotal = 0;
+
+    rows.forEach(row => {
+      const inputs = row.querySelectorAll('input[type=number]');
+      if (inputs.length < 4) return;
+      const qty   = parseFloat(inputs[0].value) || 0;
+      const price = parseFloat(inputs[1].value) || 0;
+      const tax   = parseFloat(inputs[2].value) || 0;
+      const disc  = parseFloat(inputs[3].value) || 0;
+
+      const lineBase     = qty * price;
+      const lineDiscount = lineBase * (disc / 100);
+      const lineAfterDisc = lineBase - lineDiscount;
+      const lineTax      = lineAfterDisc * (tax / 100);
+      const lineTotal    = lineAfterDisc + lineTax;
+
+      subtotal  += lineBase;
+      discTotal += lineDiscount;
+      taxTotal  += lineTax;
+
+      const totalCell = row.querySelector('.line-total');
+      if (totalCell) totalCell.textContent = fmt(lineTotal);
+    });
+
+    const total = subtotal - discTotal + taxTotal;
+    document.getElementById('subtotal').textContent    = fmt(subtotal);
+    document.getElementById('discountTotal').textContent = discTotal > 0 ? '−' + fmt(discTotal) : '$0.00';
+    document.getElementById('taxTotal').textContent    = fmt(taxTotal);
+    document.getElementById('totalDue').textContent    = fmt(total);
+  }
+
+  function addRow() {
+    const tbody = document.getElementById('lineItems');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input class="line-input" type="text" placeholder="Description" /></td>
+      <td><input class="line-input text-right mono" type="number" value="1" min="0" step="1" onchange="recalc()" /></td>
+      <td><input class="line-input text-right mono" type="number" value="0" min="0" step="0.01" onchange="recalc()" /></td>
+      <td><input class="line-input text-right mono" type="number" value="0" min="0" max="100" step="0.01" onchange="recalc()" /></td>
+      <td><input class="line-input text-right mono" type="number" value="0" min="0" max="100" step="0.01" onchange="recalc()" /></td>
+      <td class="line-total">$0.00</td>
+      <td><button class="delete-row-btn" onclick="deleteRow(this)" title="Remove line">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+    tr.querySelector('input[type=text]').focus();
+  }
+
+  function deleteRow(btn) {
+    const row = btn.closest('tr');
+    row.remove();
+    recalc();
+  }
+
+  function updateDue() {
+    const terms = document.getElementById('terms').value;
+    if (terms === 'custom') return;
+    const issueDate = new Date(document.getElementById('issueDate').value);
+    issueDate.setDate(issueDate.getDate() + parseInt(terms));
+    document.getElementById('dueDate').value = issueDate.toISOString().split('T')[0];
+    const opts = { year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('dueDateDisplay').textContent = issueDate.toLocaleDateString('en-US', opts);
+  }
+
+  function toggleClient() {
+    // In real app, open client search popover
+    alert('Client selector would open a searchable contact list here.');
+  }
+
+  function handleSend() {
+    alert('Invoice INV-0051 would be sent to t.park@velasystems.co with a Stripe payment link.');
+  }
+</script>
+</body>
+</html>

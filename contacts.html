@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contacts — Unified Operating Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="design-tokens.css" />
+  <style>
+    /* APP SHELL (shared) */
+    .app-shell { display: flex; min-height: 100vh; }
+    .sidebar { width: var(--sidebar-width); background: var(--color-bg-sidebar); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: var(--z-sticky); overflow-y: auto; }
+    .sidebar__brand { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-5) var(--space-4); border-bottom: 1px solid var(--color-border); text-decoration: none; flex-shrink: 0; }
+    .sidebar__logo { width: 32px; height: 32px; background: var(--color-primary-600); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; color: white; font-weight: var(--font-weight-bold); font-size: 15px; flex-shrink: 0; }
+    .sidebar__brand-name { font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
+    .sidebar__nav { flex: 1; padding: var(--space-3) var(--space-2); }
+    .nav-item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); color: var(--color-text-secondary); text-decoration: none; font-size: var(--font-size-md); font-weight: var(--font-weight-medium); transition: background-color var(--transition-fast), color var(--transition-fast); cursor: pointer; }
+    .nav-item:hover { background: var(--color-neutral-100); color: var(--color-text-primary); }
+    .nav-item--active { background: var(--color-primary-50); color: var(--color-primary-700); }
+    .nav-item__icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 17px; }
+    .nav-item__badge { margin-left: auto; background: var(--color-danger-600); color: white; border-radius: var(--radius-full); font-size: 10px; font-weight: var(--font-weight-semibold); padding: 1px 6px; min-width: 18px; text-align: center; }
+    .sidebar__bottom { border-top: 1px solid var(--color-border); padding: var(--space-3) var(--space-2); }
+    .user-menu { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); cursor: pointer; transition: background-color var(--transition-fast); }
+    .user-menu:hover { background: var(--color-neutral-100); }
+    .user-menu__info { flex: 1; min-width: 0; }
+    .user-menu__name { font-size: var(--font-size-md); font-weight: var(--font-weight-medium); color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-menu__email { font-size: var(--font-size-sm); color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .main { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar { height: var(--topbar-height); background: var(--color-bg-card); border-bottom: 1px solid var(--color-border); display: flex; align-items: center; gap: var(--space-4); padding: 0 var(--page-padding-x); position: sticky; top: 0; z-index: calc(var(--z-sticky) - 1); }
+    .topbar__title { font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); color: var(--color-text-primary); flex: 1; }
+    .topbar__actions { display: flex; align-items: center; gap: var(--space-2); }
+    .icon-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); border: none; background: transparent; color: var(--color-text-secondary); cursor: pointer; font-size: 18px; transition: background-color var(--transition-fast); position: relative; }
+    .icon-btn:hover { background: var(--color-neutral-100); }
+    .notification-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background: var(--color-danger-600); border-radius: var(--radius-full); border: 2px solid var(--color-bg-card); }
+    .page { padding: var(--page-padding-y) var(--page-padding-x); flex: 1; }
+    .search-trigger { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); background: var(--color-neutral-100); border: 1px solid var(--color-border); border-radius: var(--radius-md); color: var(--color-text-secondary); font-size: var(--font-size-md); cursor: pointer; transition: background-color var(--transition-fast); min-width: 240px; }
+    .search-trigger__kbd { margin-left: auto; font-size: var(--font-size-xs); background: var(--color-white); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 1px 5px; color: var(--color-text-placeholder); }
+
+    /* ===== CONTACTS PAGE ===== */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-5);
+    }
+    .page-header__title {
+      font-size: var(--font-size-3xl);
+      font-weight: var(--font-weight-bold);
+    }
+    .page-header__subtitle {
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+      margin-top: 2px;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-4);
+      flex-wrap: wrap;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      flex: 1;
+      max-width: 360px;
+    }
+    .search-bar input {
+      border: none;
+      outline: none;
+      font-family: var(--font-family-base);
+      font-size: var(--font-size-md);
+      color: var(--color-text-primary);
+      background: transparent;
+      flex: 1;
+      min-width: 0;
+    }
+    .search-bar input::placeholder { color: var(--color-text-placeholder); }
+
+    .toolbar__right { margin-left: auto; display: flex; gap: var(--space-2); }
+
+    /* Table */
+    .table-container {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      background: var(--color-neutral-50);
+      border-bottom: 1px solid var(--color-border);
+      padding: var(--space-3) var(--space-4);
+      text-align: left;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+      white-space: nowrap;
+      user-select: none;
+      cursor: pointer;
+    }
+    thead th:hover { color: var(--color-text-primary); }
+    thead th .sort-icon { margin-left: 4px; opacity: 0.5; }
+    thead th.sorted { color: var(--color-primary-600); }
+    thead th.sorted .sort-icon { opacity: 1; }
+
+    tbody tr {
+      border-bottom: 1px solid var(--color-neutral-100);
+      transition: background-color var(--transition-fast);
+      cursor: pointer;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--color-neutral-50); }
+
+    td {
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--font-size-md);
+      color: var(--color-text-primary);
+      vertical-align: middle;
+    }
+
+    .contact-cell {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+    .contact-cell__name {
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-primary);
+    }
+    .contact-cell__email {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px var(--space-2);
+      background: var(--color-neutral-100);
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-secondary);
+      margin-right: 4px;
+    }
+    .tag--blue { background: var(--color-primary-50); color: var(--color-primary-700); }
+    .tag--green { background: var(--color-success-50); color: var(--color-success-700); }
+    .tag--amber { background: var(--color-warning-50); color: var(--color-warning-700); }
+
+    .row-actions {
+      display: flex;
+      gap: var(--space-1);
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+    }
+    tbody tr:hover .row-actions { opacity: 1; }
+
+    /* Checkbox */
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: var(--color-primary-600);
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-3) var(--space-4);
+      border-top: 1px solid var(--color-border);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+    .pagination__controls { display: flex; gap: var(--space-2); }
+
+    /* Relative activity */
+    .activity-time { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+
+    /* Bulk action bar (hidden unless rows checked) */
+    .bulk-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-2) var(--space-4);
+      background: var(--color-primary-600);
+      color: white;
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-medium);
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
+    }
+    .bulk-bar .btn--ghost { color: white; }
+    .bulk-bar .btn--ghost:hover { background: rgba(255,255,255,0.15); }
+
+    @media (max-width: 767px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="dashboard.html" class="sidebar__brand">
+      <div class="sidebar__logo">Z</div>
+      <span class="sidebar__brand-name">Zephyr</span>
+    </a>
+    <nav class="sidebar__nav">
+      <a href="dashboard.html" class="nav-item"><span class="nav-item__icon">⊞</span>Dashboard</a>
+      <a href="contacts.html" class="nav-item nav-item--active"><span class="nav-item__icon">👥</span>Contacts</a>
+      <a href="pipeline.html" class="nav-item"><span class="nav-item__icon">📊</span>Pipeline</a>
+      <a href="invoices.html" class="nav-item"><span class="nav-item__icon">📄</span>Invoices<span class="nav-item__badge">3</span></a>
+      <a href="#" class="nav-item" style="margin-top:var(--space-4);"><span class="nav-item__icon">⚙</span>Settings</a>
+    </nav>
+    <div class="sidebar__bottom">
+      <div class="user-menu">
+        <div class="avatar avatar--md">SL</div>
+        <div class="user-menu__info">
+          <div class="user-menu__name">Sarah Lee</div>
+          <div class="user-menu__email">sarah@zephyrco.io</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <span class="topbar__title">Contacts</span>
+      <button class="search-trigger">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="m21 21-4.35-4.35"/></svg>
+        Search…
+        <kbd class="search-trigger__kbd">⌘K</kbd>
+      </button>
+      <div class="topbar__actions">
+        <button class="icon-btn">🔔<span class="notification-dot"></span></button>
+        <button class="btn btn--primary btn--sm">+ New</button>
+        <div class="avatar avatar--md" style="cursor:pointer;">SL</div>
+      </div>
+    </header>
+
+    <main class="page">
+      <div class="page-header">
+        <div>
+          <h1 class="page-header__title">Contacts</h1>
+          <p class="page-header__subtitle">148 contacts total</p>
+        </div>
+        <div style="display:flex;gap:var(--space-2);">
+          <button class="btn btn--secondary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+            Import CSV
+          </button>
+          <button class="btn btn--primary">
+            + Add Contact
+          </button>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="search-bar">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color:var(--color-text-secondary);flex-shrink:0;"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Search by name, email, or company…" />
+        </div>
+        <button class="btn btn--secondary btn--sm">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Filter
+        </button>
+        <button class="btn btn--secondary btn--sm">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          Columns
+        </button>
+        <div class="toolbar__right">
+          <span style="font-size:var(--font-size-sm);color:var(--color-text-secondary);padding:var(--space-2);">Sorted by Last Activity</span>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:40px;"><input type="checkbox" /></th>
+              <th class="sorted">Name <span class="sort-icon">↑</span></th>
+              <th>Company</th>
+              <th>Phone</th>
+              <th>Tags</th>
+              <th>Last Activity <span class="sort-icon">↕</span></th>
+              <th style="width:80px;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="window.location='contact-detail.html'">
+              <td><input type="checkbox" onclick="event.stopPropagation()" /></td>
+              <td>
+                <div class="contact-cell">
+                  <div class="avatar avatar--md" style="background:#EFF6FF;color:#1D4ED8;">MC</div>
+                  <div>
+                    <div class="contact-cell__name">Marcus Chen</div>
+                    <div class="contact-cell__email">marcus@meridian.io</div>
+                  </div>
+                </div>
+              </td>
+              <td style="color:var(--color-text-secondary);">Meridian Labs</td>
+              <td style="color:var(--color-text-secondary);font-family:var(--font-family-mono);font-size:var(--font-size-sm);">+1 (415) 555-0182</td>
+              <td>
+                <span class="tag tag--blue">Enterprise</span>
+                <span class="tag tag--green">Active Deal</span>
+              </td>
+              <td class="activity-time">2 hours ago</td>
+              <td>
+                <div class="row-actions">
+                  <button class="btn btn--ghost btn--sm">✉</button>
+                  <button class="btn btn--ghost btn--sm">⋯</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" onclick="event.stopPropagation()" /></td>
+              <td>
+                <div class="contact-cell">
+                  <div class="avatar avatar--md" style="background:var(--color-success-50);color:var(--color-success-700);">JR</div>
+                  <div>
+                    <div class="contact-cell__name">Jessica Rawlings</div>
+                    <div class="contact-cell__email">jessica@apexdigital.com</div>
+                  </div>
+                </div>
+              </td>
+              <td style="color:var(--color-text-secondary);">Apex Digital</td>
+              <td style="color:var(--color-text-secondary);font-family:var(--font-family-mono);font-size:var(--font-size-sm);">+1 (628) 555-0044</td>
+              <td>
+                <span class="tag tag--green">Client</span>
+                <span class="tag">VIP</span>
+              </td>
+              <td class="activity-time">Yesterday</td>
+              <td>
+                <div class="row-actions">
+                  <button class="btn btn--ghost btn--sm">✉</button>
+                  <button class="btn btn--ghost btn--sm">⋯</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" onclick="event.stopPropagation()" /></td>
+              <td>
+                <div class="contact-cell">
+                  <div class="avatar avatar--md" style="background:var(--color-warning-50);color:var(--color-warning-700);">TP</div>
+                  <div>
+                    <div class="contact-cell__name">Thomas Park</div>
+                    <div class="contact-cell__email">t.park@velasystems.co</div>
+                  </div>
+                </div>
+              </td>
+              <td style="color:var(--color-text-secondary);">Vela Systems</td>
+              <td style="color:var(--color-text-secondary);font-family:var(--font-family-mono);font-size:var(--font-size-sm);">+1 (312) 555-0298</td>
+              <td>
+                <span class="tag tag--amber">Hot Lead</span>
+              </td>
+              <td class="activity-time">2 days ago</td>
+              <td>
+                <div class="row-actions">
+                  <button class="btn btn--ghost btn--sm">✉</button>
+                  <button class="btn btn--ghost btn--sm">⋯</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" onclick="event.stopPropagation()" /></td>
+              <td>
+                <div class="contact-cell">
+                  <div class="avatar avatar--md">AL</div>
+                  <div>
+                    <div class="contact-cell__name">Amanda Lowe</div>
+                    <div class="contact-cell__email">amanda@blueoak.co</div>
+                  </div>
+                </div>
+              </td>
+              <td style="color:var(--color-text-secondary);">Blue Oak LLC</td>
+              <td style="color:var(--color-text-secondary);font-family:var(--font-family-mono);font-size:var(--font-size-sm);">+1 (213) 555-0170</td>
+              <td>
+                <span class="tag">SMB</span>
+                <span class="tag tag--amber">Follow-up</span>
+              </td>
+              <td class="activity-time" style="color:var(--color-warning-600);font-weight:500;">9 days ago ⚠</td>
+              <td>
+                <div class="row-actions">
+                  <button class="btn btn--ghost btn--sm">✉</button>
+                  <button class="btn btn--ghost btn--sm">⋯</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" onclick="event.stopPropagation()" /></td>
+              <td>
+                <div class="contact-cell">
+                  <div class="avatar avatar--md" style="background:#F3E8FF;color:#7C3AED;">DM</div>
+                  <div>
+                    <div class="contact-cell__name">David Morrison</div>
+                    <div class="contact-cell__email">david@summitgroup.biz</div>
+                  </div>
+                </div>
+              </td>
+              <td style="color:var(--color-text-secondary);">Summit Group</td>
+              <td style="color:var(--color-text-secondary);font-family:var(--font-family-mono);font-size:var(--font-size-sm);">+1 (510) 555-0031</td>
+              <td>
+                <span class="tag tag--blue">Enterprise</span>
+              </td>
+              <td class="activity-time">3 days ago</td>
+              <td>
+                <div class="row-actions">
+                  <button class="btn btn--ghost btn--sm">✉</button>
+                  <button class="btn btn--ghost btn--sm">⋯</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" onclick="event.stopPropagation()" /></td>
+              <td>
+                <div class="contact-cell">
+                  <div class="avatar avatar--md" style="background:var(--color-success-50);color:var(--color-success-700);">NG</div>
+                  <div>
+                    <div class="contact-cell__name">Nina Garcia</div>
+                    <div class="contact-cell__email">nina.garcia@techstartinc.com</div>
+                  </div>
+                </div>
+              </td>
+              <td style="color:var(--color-text-secondary);">TechStart Inc</td>
+              <td style="color:var(--color-text-secondary);font-family:var(--font-family-mono);font-size:var(--font-size-sm);">+1 (737) 555-0208</td>
+              <td>
+                <span class="tag tag--green">Active Deal</span>
+                <span class="tag">New</span>
+              </td>
+              <td class="activity-time">5 days ago</td>
+              <td>
+                <div class="row-actions">
+                  <button class="btn btn--ghost btn--sm">✉</button>
+                  <button class="btn btn--ghost btn--sm">⋯</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <span>Showing 1–6 of 148 contacts</span>
+          <div class="pagination__controls">
+            <button class="btn btn--secondary btn--sm" disabled>← Previous</button>
+            <button class="btn btn--secondary btn--sm">1</button>
+            <button class="btn btn--ghost btn--sm">2</button>
+            <button class="btn btn--ghost btn--sm">3</button>
+            <span class="btn btn--ghost btn--sm" style="cursor:default;">…</span>
+            <button class="btn btn--ghost btn--sm">25</button>
+            <button class="btn btn--secondary btn--sm">Next →</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+</body>
+</html>

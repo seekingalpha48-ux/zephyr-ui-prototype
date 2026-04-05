@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Unified Operating Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="design-tokens.css" />
+  <style>
+    /* ===== APP SHELL ===== */
+    .app-shell {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--color-bg-sidebar);
+      border-right: 1px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: var(--z-sticky);
+      overflow-y: auto;
+    }
+
+    .sidebar__brand {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-5) var(--space-4);
+      border-bottom: 1px solid var(--color-border);
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .sidebar__logo {
+      width: 32px;
+      height: 32px;
+      background: var(--color-primary-600);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: var(--font-weight-bold);
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .sidebar__brand-name {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+    }
+
+    .sidebar__nav {
+      flex: 1;
+      padding: var(--space-3) var(--space-2);
+    }
+
+    .nav-group {
+      margin-bottom: var(--space-1);
+    }
+
+    .nav-group__label {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-placeholder);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: var(--space-2) var(--space-3);
+      margin-top: var(--space-2);
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-md);
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-medium);
+      transition: background-color var(--transition-fast), color var(--transition-fast);
+      cursor: pointer;
+    }
+
+    .nav-item:hover {
+      background: var(--color-neutral-100);
+      color: var(--color-text-primary);
+    }
+
+    .nav-item--active {
+      background: var(--color-primary-50);
+      color: var(--color-primary-700);
+    }
+
+    .nav-item--active:hover {
+      background: var(--color-primary-100);
+    }
+
+    .nav-item__icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 17px;
+      line-height: 1;
+    }
+
+    .nav-item__badge {
+      margin-left: auto;
+      background: var(--color-danger-600);
+      color: white;
+      border-radius: var(--radius-full);
+      font-size: 10px;
+      font-weight: var(--font-weight-semibold);
+      padding: 1px 6px;
+      min-width: 18px;
+      text-align: center;
+    }
+
+    .sidebar__bottom {
+      border-top: 1px solid var(--color-border);
+      padding: var(--space-3) var(--space-2);
+    }
+
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: background-color var(--transition-fast);
+    }
+    .user-menu:hover { background: var(--color-neutral-100); }
+
+    .user-menu__info { flex: 1; min-width: 0; }
+    .user-menu__name { font-size: var(--font-size-md); font-weight: var(--font-weight-medium); color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-menu__email { font-size: var(--font-size-sm); color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ===== MAIN AREA ===== */
+    .main {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ===== TOPBAR ===== */
+    .topbar {
+      height: var(--topbar-height);
+      background: var(--color-bg-card);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      padding: 0 var(--page-padding-x);
+      position: sticky;
+      top: 0;
+      z-index: calc(var(--z-sticky) - 1);
+    }
+
+    .topbar__title {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+      flex: 1;
+    }
+
+    .search-trigger {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      background: var(--color-neutral-100);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-md);
+      cursor: pointer;
+      transition: background-color var(--transition-fast), border-color var(--transition-fast);
+      min-width: 240px;
+    }
+    .search-trigger:hover { background: var(--color-neutral-200); border-color: var(--color-neutral-300); }
+
+    .search-trigger__kbd {
+      margin-left: auto;
+      font-size: var(--font-size-xs);
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 1px 5px;
+      color: var(--color-text-placeholder);
+    }
+
+    .topbar__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md);
+      border: none;
+      background: transparent;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      font-size: 18px;
+      transition: background-color var(--transition-fast), color var(--transition-fast);
+      position: relative;
+    }
+    .icon-btn:hover { background: var(--color-neutral-100); color: var(--color-text-primary); }
+
+    .notification-dot {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 8px;
+      height: 8px;
+      background: var(--color-danger-600);
+      border-radius: var(--radius-full);
+      border: 2px solid var(--color-bg-card);
+    }
+
+    /* ===== PAGE CONTENT ===== */
+    .page {
+      padding: var(--page-padding-y) var(--page-padding-x);
+      flex: 1;
+    }
+
+    .page__header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: var(--space-6);
+    }
+
+    .page__greeting {
+      font-size: var(--font-size-3xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-primary);
+      line-height: 36px;
+    }
+    .page__subtext {
+      margin-top: var(--space-1);
+      font-size: var(--font-size-md);
+      color: var(--color-text-secondary);
+    }
+
+    /* ===== STAT CARDS ROW ===== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+
+    .stat-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-card__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-3);
+    }
+
+    .stat-card__label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-secondary);
+    }
+
+    .stat-card__icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    .stat-card__icon--primary { background: var(--color-primary-50); color: var(--color-primary-600); }
+    .stat-card__icon--success { background: var(--color-success-50); color: var(--color-success-600); }
+    .stat-card__icon--warning { background: var(--color-warning-50); color: var(--color-warning-600); }
+    .stat-card__icon--neutral { background: var(--color-neutral-100); color: var(--color-neutral-600); }
+
+    .stat-card__value {
+      font-size: 28px;
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-primary);
+      line-height: 1;
+      margin-bottom: var(--space-2);
+      font-family: var(--font-family-mono);
+    }
+
+    .stat-card__delta {
+      font-size: var(--font-size-sm);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .stat-card__delta--up   { color: var(--color-success-600); }
+    .stat-card__delta--down { color: var(--color-danger-600); }
+    .stat-card__delta-label { color: var(--color-text-secondary); }
+
+    /* ===== BOTTOM GRID ===== */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: var(--space-6);
+    }
+
+    .dashboard-main { display: flex; flex-direction: column; gap: var(--space-6); }
+    .dashboard-aside { display: flex; flex-direction: column; gap: var(--space-6); }
+
+    /* ===== SECTION HEADER ===== */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-4);
+    }
+    .section-header__title {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+    }
+
+    /* ===== PIPELINE MINI KANBAN ===== */
+    .pipeline-card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .pipeline-columns {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: var(--space-3);
+      overflow-x: auto;
+    }
+
+    .pipeline-col {}
+    .pipeline-col__header {
+      margin-bottom: var(--space-3);
+    }
+    .pipeline-col__name {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+    .pipeline-col__count {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+    .pipeline-col__value {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+      font-family: var(--font-family-mono);
+    }
+
+    .deal-mini-card {
+      background: var(--color-neutral-50);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-3);
+      margin-bottom: var(--space-2);
+      cursor: pointer;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    .deal-mini-card:hover { border-color: var(--color-primary-300); box-shadow: var(--shadow-xs); }
+
+    .deal-mini-card__name { font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); color: var(--color-text-primary); margin-bottom: 4px; }
+    .deal-mini-card__company { font-size: 12px; color: var(--color-text-secondary); margin-bottom: var(--space-2); }
+    .deal-mini-card__footer { display: flex; align-items: center; justify-content: space-between; }
+    .deal-mini-card__value { font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--color-text-primary); font-family: var(--font-family-mono); }
+
+    .activity-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: var(--radius-full);
+      background: var(--color-danger-500);
+      display: inline-block;
+      title: "No activity > 7 days";
+    }
+
+    /* ===== ACTIVITY FEED ===== */
+    .activity-feed {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .activity-item {
+      display: flex;
+      gap: var(--space-3);
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--color-neutral-100);
+    }
+    .activity-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .activity-item:first-child { padding-top: 0; }
+
+    .activity-item__icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .activity-item__icon--invoice { background: var(--color-success-50); color: var(--color-success-600); }
+    .activity-item__icon--deal    { background: var(--color-primary-50); color: var(--color-primary-600); }
+    .activity-item__icon--contact { background: var(--color-neutral-100); color: var(--color-neutral-600); }
+
+    .activity-item__content { flex: 1; min-width: 0; }
+    .activity-item__text { font-size: var(--font-size-md); color: var(--color-text-primary); }
+    .activity-item__text strong { font-weight: var(--font-weight-semibold); }
+    .activity-item__meta { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-top: 2px; }
+
+    /* ===== FOLLOW-UPS ===== */
+    .follow-ups {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .followup-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--color-neutral-100);
+    }
+    .followup-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .followup-item:first-child { padding-top: 0; }
+
+    .followup-item__content { flex: 1; min-width: 0; }
+    .followup-item__name { font-size: var(--font-size-md); font-weight: var(--font-weight-medium); color: var(--color-text-primary); }
+    .followup-item__detail { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-top: 2px; }
+    .followup-item__action { flex-shrink: 0; }
+
+    /* ===== OVERDUE INVOICES CARD ===== */
+    .overdue-card {
+      background: var(--color-danger-50);
+      border: 1px solid #FECACA;
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+    }
+    .overdue-card__header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      margin-bottom: var(--space-3);
+    }
+    .overdue-card__title {
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-danger-700);
+    }
+    .overdue-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-2) 0;
+      border-bottom: 1px solid #FECACA;
+      font-size: var(--font-size-sm);
+    }
+    .overdue-item:last-child { border-bottom: none; }
+    .overdue-item__client { font-weight: var(--font-weight-medium); color: var(--color-danger-700); }
+    .overdue-item__amount { font-family: var(--font-family-mono); font-weight: var(--font-weight-semibold); color: var(--color-danger-700); }
+    .overdue-item__days { color: var(--color-danger-500); }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1279px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 767px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-3); }
+      .pipeline-columns { grid-template-columns: repeat(3, minmax(140px, 1fr)); }
+    }
+
+    /* ===== ICON SVG STUBS (inline, no deps) ===== */
+    .icon { display: inline-block; width: 1em; height: 1em; vertical-align: -0.125em; }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <a href="#" class="sidebar__brand">
+      <div class="sidebar__logo">Z</div>
+      <span class="sidebar__brand-name">Zephyr</span>
+    </a>
+
+    <nav class="sidebar__nav">
+      <div class="nav-group">
+        <a href="#" class="nav-item nav-item--active">
+          <span class="nav-item__icon">⊞</span>
+          Dashboard
+        </a>
+        <a href="contacts.html" class="nav-item">
+          <span class="nav-item__icon">👥</span>
+          Contacts
+        </a>
+        <a href="pipeline.html" class="nav-item">
+          <span class="nav-item__icon">📊</span>
+          Pipeline
+        </a>
+        <a href="invoices.html" class="nav-item">
+          <span class="nav-item__icon">📄</span>
+          Invoices
+          <span class="nav-item__badge">3</span>
+        </a>
+      </div>
+
+      <div class="nav-group" style="margin-top: auto;">
+        <a href="#" class="nav-item" style="margin-top: var(--space-4);">
+          <span class="nav-item__icon">⚙</span>
+          Settings
+        </a>
+        <a href="#" class="nav-item">
+          <span class="nav-item__icon">?</span>
+          Help & Support
+        </a>
+      </div>
+    </nav>
+
+    <div class="sidebar__bottom">
+      <div class="user-menu">
+        <div class="avatar avatar--md">SL</div>
+        <div class="user-menu__info">
+          <div class="user-menu__name">Sarah Lee</div>
+          <div class="user-menu__email">sarah@zephyrco.io</div>
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" color="var(--color-text-secondary)"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <span class="topbar__title">Dashboard</span>
+
+      <button class="search-trigger" aria-label="Search (⌘K)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="m21 21-4.35-4.35"/></svg>
+        Search…
+        <kbd class="search-trigger__kbd">⌘K</kbd>
+      </button>
+
+      <div class="topbar__actions">
+        <button class="icon-btn" aria-label="Notifications">
+          🔔
+          <span class="notification-dot"></span>
+        </button>
+        <button class="btn btn--primary btn--sm">
+          + New
+        </button>
+        <div class="avatar avatar--md" style="cursor:pointer;">SL</div>
+      </div>
+    </header>
+
+    <!-- PAGE -->
+    <main class="page">
+
+      <!-- PAGE HEADER -->
+      <div class="page__header">
+        <div>
+          <h1 class="page__greeting">Good morning, Sarah 👋</h1>
+          <p class="page__subtext">Here's what's happening with your business today.</p>
+        </div>
+        <div style="display:flex;gap:var(--space-2);align-items:center;">
+          <button class="btn btn--secondary btn--sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Apr 2026
+          </button>
+        </div>
+      </div>
+
+      <!-- STAT CARDS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card__header">
+            <span class="stat-card__label">Open Pipeline</span>
+            <span class="stat-card__icon stat-card__icon--primary">📊</span>
+          </div>
+          <div class="stat-card__value">$84,200</div>
+          <div class="stat-card__delta stat-card__delta--up">
+            ↑ 12%
+            <span class="stat-card__delta-label">vs last month</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card__header">
+            <span class="stat-card__label">Revenue MTD</span>
+            <span class="stat-card__icon stat-card__icon--success">💰</span>
+          </div>
+          <div class="stat-card__value">$21,450</div>
+          <div class="stat-card__delta stat-card__delta--up">
+            ↑ 8%
+            <span class="stat-card__delta-label">vs last month</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card__header">
+            <span class="stat-card__label">Overdue Invoices</span>
+            <span class="stat-card__icon stat-card__icon--warning">⚠️</span>
+          </div>
+          <div class="stat-card__value" style="color:var(--color-danger-600);">3</div>
+          <div class="stat-card__delta stat-card__delta--down">
+            $6,800 total overdue
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card__header">
+            <span class="stat-card__label">New Contacts</span>
+            <span class="stat-card__icon stat-card__icon--neutral">👤</span>
+          </div>
+          <div class="stat-card__value">12</div>
+          <div class="stat-card__delta stat-card__delta--up">
+            ↑ 4
+            <span class="stat-card__delta-label">vs last month</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN GRID -->
+      <div class="dashboard-grid">
+
+        <!-- LEFT: Pipeline + Activity -->
+        <div class="dashboard-main">
+
+          <!-- Pipeline Snapshot -->
+          <div class="pipeline-card">
+            <div class="section-header">
+              <span class="section-header__title">Pipeline Snapshot</span>
+              <a href="pipeline.html" class="btn btn--ghost btn--sm">View all →</a>
+            </div>
+            <div class="pipeline-columns">
+              <!-- Lead -->
+              <div class="pipeline-col">
+                <div class="pipeline-col__header">
+                  <div class="pipeline-col__name">Lead</div>
+                  <div class="pipeline-col__count">5 deals</div>
+                  <div class="pipeline-col__value">$18,500</div>
+                </div>
+                <div class="deal-mini-card">
+                  <div class="deal-mini-card__name">Acme Corp</div>
+                  <div class="deal-mini-card__company">Software License</div>
+                  <div class="deal-mini-card__footer">
+                    <span class="deal-mini-card__value">$4,200</span>
+                    <span class="activity-dot" title="No activity in 8 days"></span>
+                  </div>
+                </div>
+                <div class="deal-mini-card">
+                  <div class="deal-mini-card__name">TechStart Inc</div>
+                  <div class="deal-mini-card__company">Consulting</div>
+                  <div class="deal-mini-card__footer">
+                    <span class="deal-mini-card__value">$7,500</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Qualified -->
+              <div class="pipeline-col">
+                <div class="pipeline-col__header">
+                  <div class="pipeline-col__name">Qualified</div>
+                  <div class="pipeline-col__count">3 deals</div>
+                  <div class="pipeline-col__value">$29,200</div>
+                </div>
+                <div class="deal-mini-card">
+                  <div class="deal-mini-card__name">Meridian Labs</div>
+                  <div class="deal-mini-card__company">Annual Contract</div>
+                  <div class="deal-mini-card__footer">
+                    <span class="deal-mini-card__value">$12,000</span>
+                  </div>
+                </div>
+                <div class="deal-mini-card">
+                  <div class="deal-mini-card__name">Blue Oak LLC</div>
+                  <div class="deal-mini-card__company">Integration Project</div>
+                  <div class="deal-mini-card__footer">
+                    <span class="deal-mini-card__value">$9,800</span>
+                    <span class="activity-dot" title="No activity in 9 days"></span>
+                  </div>
+                </div>
+              </div>
+              <!-- Proposal -->
+              <div class="pipeline-col">
+                <div class="pipeline-col__header">
+                  <div class="pipeline-col__name">Proposal</div>
+                  <div class="pipeline-col__count">4 deals</div>
+                  <div class="pipeline-col__value">$24,000</div>
+                </div>
+                <div class="deal-mini-card">
+                  <div class="deal-mini-card__name">Vela Systems</div>
+                  <div class="deal-mini-card__company">Retainer</div>
+                  <div class="deal-mini-card__footer">
+                    <span class="deal-mini-card__value">$8,400</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Won -->
+              <div class="pipeline-col">
+                <div class="pipeline-col__header">
+                  <div class="pipeline-col__name" style="color:var(--color-success-600);">Won</div>
+                  <div class="pipeline-col__count">6 deals</div>
+                  <div class="pipeline-col__value">$47,200</div>
+                </div>
+                <div class="deal-mini-card" style="border-color:var(--color-success-500);">
+                  <div class="deal-mini-card__name">Apex Digital</div>
+                  <div class="deal-mini-card__company">Website Redesign</div>
+                  <div class="deal-mini-card__footer">
+                    <span class="deal-mini-card__value">$14,000</span>
+                    <span class="badge badge--paid">Won</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Lost -->
+              <div class="pipeline-col">
+                <div class="pipeline-col__header">
+                  <div class="pipeline-col__name" style="color:var(--color-text-secondary);">Lost</div>
+                  <div class="pipeline-col__count">2 deals</div>
+                  <div class="pipeline-col__value">$5,500</div>
+                </div>
+                <div class="deal-mini-card" style="opacity:0.6;">
+                  <div class="deal-mini-card__name">Nova Retail</div>
+                  <div class="deal-mini-card__company">POS Integration</div>
+                  <div class="deal-mini-card__footer">
+                    <span class="deal-mini-card__value">$3,200</span>
+                    <span class="badge badge--lost">Lost</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity Feed -->
+          <div class="activity-feed">
+            <div class="section-header">
+              <span class="section-header__title">Recent Activity</span>
+              <button class="btn btn--ghost btn--sm">See all</button>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-item__icon activity-item__icon--invoice">💰</div>
+              <div class="activity-item__content">
+                <div class="activity-item__text"><strong>Apex Digital</strong> paid invoice <span class="text-mono">INV-0047</span></div>
+                <div class="activity-item__meta">$14,000 · 2 hours ago</div>
+              </div>
+              <span class="badge badge--paid">Paid</span>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-item__icon activity-item__icon--deal">📊</div>
+              <div class="activity-item__content">
+                <div class="activity-item__text"><strong>Vela Systems</strong> deal moved to <em>Proposal Sent</em></div>
+                <div class="activity-item__meta">Retainer · 5 hours ago</div>
+              </div>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-item__icon activity-item__icon--contact">👤</div>
+              <div class="activity-item__content">
+                <div class="activity-item__text">New contact added: <strong>Marcus Chen</strong></div>
+                <div class="activity-item__meta">Meridian Labs · Yesterday</div>
+              </div>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-item__icon activity-item__icon--invoice">📄</div>
+              <div class="activity-item__content">
+                <div class="activity-item__text">Invoice <span class="text-mono">INV-0049</span> sent to <strong>TechStart Inc</strong></div>
+                <div class="activity-item__meta">$7,500 due Apr 18 · Yesterday</div>
+              </div>
+              <span class="badge badge--sent">Sent</span>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-item__icon activity-item__icon--deal">📊</div>
+              <div class="activity-item__content">
+                <div class="activity-item__text"><strong>Blue Oak LLC</strong> deal created</div>
+                <div class="activity-item__meta">Integration Project · 2 days ago</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT: Follow-ups + Overdue -->
+        <div class="dashboard-aside">
+
+          <!-- Overdue Invoices -->
+          <div class="overdue-card">
+            <div class="overdue-card__header">
+              <span>⚠️</span>
+              <span class="overdue-card__title">3 Overdue Invoices — $6,800</span>
+            </div>
+            <div class="overdue-item">
+              <div>
+                <div class="overdue-item__client">Summit Group</div>
+                <div class="overdue-item__days">14 days overdue</div>
+              </div>
+              <div class="overdue-item__amount">$3,200</div>
+            </div>
+            <div class="overdue-item">
+              <div>
+                <div class="overdue-item__client">Lakewood Media</div>
+                <div class="overdue-item__days">7 days overdue</div>
+              </div>
+              <div class="overdue-item__amount">$1,800</div>
+            </div>
+            <div class="overdue-item">
+              <div>
+                <div class="overdue-item__client">Brightline Co.</div>
+                <div class="overdue-item__days">3 days overdue</div>
+              </div>
+              <div class="overdue-item__amount">$1,800</div>
+            </div>
+            <div style="margin-top:var(--space-3);">
+              <a href="invoices.html" class="btn btn--danger" style="width:100%;justify-content:center;">Send Reminders</a>
+            </div>
+          </div>
+
+          <!-- Follow-ups -->
+          <div class="follow-ups">
+            <div class="section-header">
+              <span class="section-header__title">Needs Follow-up</span>
+              <span class="badge badge--overdue">4</span>
+            </div>
+
+            <div class="followup-item">
+              <div class="avatar avatar--sm">AC</div>
+              <div class="followup-item__content">
+                <div class="followup-item__name">Acme Corp</div>
+                <div class="followup-item__detail">No activity for 8 days · Lead stage</div>
+              </div>
+              <div class="followup-item__action">
+                <button class="btn btn--ghost btn--sm">Log note</button>
+              </div>
+            </div>
+
+            <div class="followup-item">
+              <div class="avatar avatar--sm" style="background:var(--color-warning-50);color:var(--color-warning-700);">BO</div>
+              <div class="followup-item__content">
+                <div class="followup-item__name">Blue Oak LLC</div>
+                <div class="followup-item__detail">No activity for 9 days · Qualified</div>
+              </div>
+              <div class="followup-item__action">
+                <button class="btn btn--ghost btn--sm">Log note</button>
+              </div>
+            </div>
+
+            <div class="followup-item">
+              <div class="avatar avatar--sm" style="background:var(--color-success-50);color:var(--color-success-700);">VS</div>
+              <div class="followup-item__content">
+                <div class="followup-item__name">Vela Systems</div>
+                <div class="followup-item__detail">Proposal sent 5 days ago, no response</div>
+              </div>
+              <div class="followup-item__action">
+                <button class="btn btn--ghost btn--sm">Log note</button>
+              </div>
+            </div>
+
+            <div class="followup-item">
+              <div class="avatar avatar--sm" style="background:#EFF6FF;color:#1D4ED8;">ML</div>
+              <div class="followup-item__content">
+                <div class="followup-item__name">Meridian Labs</div>
+                <div class="followup-item__detail">Contract discussion stalled 6 days</div>
+              </div>
+              <div class="followup-item__action">
+                <button class="btn btn--ghost btn--sm">Log note</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="card">
+            <div class="section-header" style="margin-bottom:var(--space-3);">
+              <span class="section-header__title">Quick Actions</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:var(--space-2);">
+              <a href="contacts.html" class="btn btn--secondary" style="justify-content:flex-start;gap:var(--space-3);">
+                <span>👤</span> Add Contact
+              </a>
+              <a href="pipeline.html" class="btn btn--secondary" style="justify-content:flex-start;gap:var(--space-3);">
+                <span>📊</span> Create Deal
+              </a>
+              <a href="invoices.html" class="btn btn--primary" style="justify-content:flex-start;gap:var(--space-3);">
+                <span>📄</span> New Invoice
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+</body>
+</html>
