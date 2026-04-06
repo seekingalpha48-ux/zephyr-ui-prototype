@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invoice INV-0042 — Pay Online</title>
+  <link rel="stylesheet" href="design-tokens.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+      color: var(--color-text-primary);
+      background: var(--color-neutral-100);
+      min-height: 100vh;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      background: #fff;
+      border-bottom: 1px solid var(--color-border);
+      padding: var(--space-3) var(--space-6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topbar__brand {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+    .topbar__logo {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      background: var(--color-primary-600);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: var(--text-base);
+    }
+    .topbar__biz-name {
+      font-weight: 600;
+      font-size: var(--text-base);
+      color: var(--color-text-primary);
+    }
+    .topbar__secure {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1-5);
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+    }
+    .topbar__secure svg { color: var(--color-success-600); }
+
+    /* ── Page layout ── */
+    .page {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: var(--space-8) var(--space-4);
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: var(--space-6);
+      align-items: start;
+    }
+    @media (max-width: 720px) {
+      .page { grid-template-columns: 1fr; }
+      .payment-panel { order: -1; }
+    }
+
+    /* ── Invoice summary panel ── */
+    .invoice-summary {
+      background: #fff;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-6);
+    }
+    .invoice-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: var(--space-5);
+      padding-bottom: var(--space-5);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .invoice-header h2 {
+      font-size: var(--text-xl);
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+    .invoice-header .inv-number {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      margin-top: var(--space-1);
+    }
+    .amount-due {
+      text-align: right;
+    }
+    .amount-due__label {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 500;
+    }
+    .amount-due__value {
+      font-family: var(--font-mono);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      line-height: 1.1;
+      margin-top: var(--space-1);
+    }
+    .amount-due__currency {
+      font-size: var(--text-base);
+      font-weight: 500;
+      color: var(--color-text-secondary);
+    }
+
+    .parties {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+      margin-bottom: var(--space-5);
+    }
+    .party__label {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 500;
+      margin-bottom: var(--space-1-5);
+    }
+    .party__name { font-weight: 600; font-size: var(--text-sm); }
+    .party__detail { color: var(--color-text-secondary); font-size: var(--text-sm); line-height: 1.5; }
+
+    .dates-row {
+      display: flex;
+      gap: var(--space-6);
+      margin-bottom: var(--space-5);
+      padding: var(--space-3) var(--space-4);
+      background: var(--color-neutral-50);
+      border-radius: var(--radius-md);
+    }
+    .date-item__label {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      font-weight: 500;
+    }
+    .date-item__value {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    .date-item__value--overdue { color: var(--color-danger-600); }
+
+    /* Line items */
+    .line-items { margin-bottom: var(--space-5); }
+    .line-items__header {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: var(--space-3);
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--color-border);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .line-items__header .col-num { text-align: right; }
+    .line-item {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: var(--space-3);
+      align-items: start;
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--color-border-light);
+    }
+    .line-item:last-child { border-bottom: none; }
+    .li-name { font-weight: 500; }
+    .li-desc { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: 2px; }
+    .li-qty, .li-price, .li-total {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      text-align: right;
+      padding-top: 2px;
+    }
+    .li-total { font-weight: 600; }
+
+    /* Totals */
+    .totals {
+      border-top: 2px solid var(--color-border);
+      padding-top: var(--space-4);
+    }
+    .totals-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-1-5) 0;
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+    }
+    .totals-row.total-due {
+      font-size: var(--text-base);
+      font-weight: 700;
+      color: var(--color-text-primary);
+      padding-top: var(--space-3);
+      margin-top: var(--space-1);
+      border-top: 1px solid var(--color-border);
+    }
+    .totals-row .mono { font-family: var(--font-mono); }
+
+    /* Notes */
+    .invoice-note {
+      margin-top: var(--space-5);
+      padding: var(--space-3) var(--space-4);
+      background: var(--color-neutral-50);
+      border-radius: var(--radius-md);
+      font-size: var(--text-xs);
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+    .invoice-note strong { color: var(--color-text-primary); }
+
+    /* ── Payment panel ── */
+    .payment-panel {
+      background: #fff;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      position: sticky;
+      top: var(--space-6);
+    }
+    .payment-panel__header {
+      padding: var(--space-5) var(--space-6);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .payment-panel__header h3 {
+      font-size: var(--text-lg);
+      font-weight: 700;
+    }
+    .payment-panel__header p {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      margin-top: var(--space-1);
+    }
+    .payment-panel__body { padding: var(--space-5) var(--space-6); }
+
+    /* Payment method selector */
+    .pay-method-tabs {
+      display: flex;
+      gap: var(--space-2);
+      margin-bottom: var(--space-5);
+    }
+    .pay-tab {
+      flex: 1;
+      padding: var(--space-2-5) var(--space-3);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: #fff;
+      font-size: var(--text-sm);
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      transition: var(--transition-fast);
+    }
+    .pay-tab.active {
+      border-color: var(--color-primary-500);
+      background: var(--color-primary-50);
+      color: var(--color-primary-700);
+    }
+    .pay-tab:hover:not(.active) {
+      border-color: var(--color-border-focus);
+      background: var(--color-neutral-50);
+    }
+
+    /* Form fields */
+    .field { margin-bottom: var(--space-4); }
+    .field label {
+      display: block;
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-1-5);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .field input, .field select {
+      width: 100%;
+      height: 44px;
+      padding: 0 var(--space-3);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      font-family: var(--font-sans);
+      color: var(--color-text-primary);
+      background: #fff;
+      outline: none;
+      transition: var(--transition-fast);
+    }
+    .field input:focus, .field select:focus {
+      border-color: var(--color-primary-500);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+    }
+    .field input::placeholder { color: var(--color-text-placeholder); }
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-3);
+    }
+
+    /* Card number field with icons */
+    .card-input-wrap {
+      position: relative;
+    }
+    .card-input-wrap input {
+      padding-right: 80px;
+      font-family: var(--font-mono);
+      letter-spacing: 0.08em;
+    }
+    .card-icons {
+      position: absolute;
+      right: var(--space-3);
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      gap: var(--space-1);
+      align-items: center;
+    }
+    .card-icon {
+      width: 32px;
+      height: 20px;
+      border-radius: 3px;
+      background: var(--color-neutral-200);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--color-text-muted);
+    }
+    .card-icon.visa { background: #1a1f71; color: #fff; font-size: 8px; }
+    .card-icon.mc { background: #eb001b; color: #fff; font-size: 8px; }
+
+    /* Bank/ACH panel */
+    .bank-panel { display: none; }
+    .bank-panel.visible { display: block; }
+    .card-panel.hidden { display: none; }
+
+    .bank-info-box {
+      padding: var(--space-4);
+      background: var(--color-primary-50);
+      border: 1px solid var(--color-primary-200);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-4);
+      font-size: var(--text-sm);
+      color: var(--color-primary-700);
+      line-height: 1.6;
+    }
+    .bank-info-box strong { color: var(--color-primary-800); }
+
+    /* Pay button */
+    .pay-btn {
+      width: 100%;
+      height: 52px;
+      background: var(--color-primary-600);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-lg);
+      font-size: var(--text-base);
+      font-weight: 600;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      transition: var(--transition-fast);
+      margin-top: var(--space-5);
+    }
+    .pay-btn:hover { background: var(--color-primary-700); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+    .pay-btn:active { transform: translateY(0); }
+
+    /* Stripe badge */
+    .stripe-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-1-5);
+      margin-top: var(--space-3);
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+    }
+    .stripe-logo {
+      font-weight: 700;
+      font-size: 11px;
+      color: #635bff;
+      letter-spacing: -0.02em;
+    }
+
+    /* ── Paid / Success state ── */
+    .paid-overlay {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-10) var(--space-6);
+      text-align: center;
+    }
+    .paid-overlay.visible { display: flex; }
+    .paid-check {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--color-success-100);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin-bottom: var(--space-4);
+    }
+    .paid-overlay h3 {
+      font-size: var(--text-xl);
+      font-weight: 700;
+      color: var(--color-success-700);
+      margin-bottom: var(--space-2);
+    }
+    .paid-overlay p {
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      max-width: 260px;
+      line-height: 1.6;
+    }
+    .paid-ref {
+      margin-top: var(--space-4);
+      padding: var(--space-2) var(--space-4);
+      background: var(--color-neutral-100);
+      border-radius: var(--radius-md);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+    }
+    .download-btn {
+      margin-top: var(--space-5);
+      padding: var(--space-2-5) var(--space-5);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: #fff;
+      font-size: var(--text-sm);
+      font-weight: 500;
+      color: var(--color-text-primary);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+    .download-btn:hover { background: var(--color-neutral-50); border-color: var(--color-border-focus); }
+
+    /* ── Already paid banner ── */
+    .already-paid-banner {
+      display: none;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4) var(--space-5);
+      background: var(--color-success-50);
+      border: 1px solid var(--color-success-200);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-6);
+    }
+    .already-paid-banner.visible { display: flex; }
+    .already-paid-banner .icon { font-size: 1.5rem; }
+    .already-paid-banner strong { color: var(--color-success-700); font-size: var(--text-sm); display: block; }
+    .already-paid-banner span { color: var(--color-success-600); font-size: var(--text-xs); }
+
+    /* ── Prototype state switcher (not part of final product) ── */
+    .proto-switcher {
+      position: fixed;
+      bottom: var(--space-5);
+      right: var(--space-5);
+      background: var(--color-neutral-800);
+      color: #fff;
+      border-radius: var(--radius-lg);
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--text-xs);
+      box-shadow: var(--shadow-lg);
+      z-index: 100;
+    }
+    .proto-switcher strong { display: block; margin-bottom: var(--space-2); color: var(--color-neutral-400); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .proto-switcher button {
+      display: block;
+      width: 100%;
+      padding: var(--space-1-5) var(--space-2);
+      margin-bottom: var(--space-1);
+      background: var(--color-neutral-700);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: #fff;
+      font-size: var(--text-xs);
+      cursor: pointer;
+      text-align: left;
+      transition: var(--transition-fast);
+    }
+    .proto-switcher button:hover { background: var(--color-neutral-600); }
+    .proto-switcher button.active { background: var(--color-primary-600); }
+
+    /* Footer */
+    .footer {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: var(--space-6) var(--space-4);
+      text-align: center;
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+    }
+    .footer a { color: var(--color-text-muted); text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="topbar__brand">
+      <div class="topbar__logo">AC</div>
+      <span class="topbar__biz-name">Acme Creative Studio</span>
+    </div>
+    <div class="topbar__secure">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+      Secure Payment
+    </div>
+  </header>
+
+  <!-- Already paid banner (shown in "already paid" state) -->
+  <div style="max-width:920px;margin:0 auto;padding:var(--space-4) var(--space-4) 0;">
+    <div class="already-paid-banner" id="alreadyPaidBanner">
+      <div class="icon">✅</div>
+      <div>
+        <strong>This invoice has already been paid</strong>
+        <span>Payment received on March 28, 2026 · Ref: pi_3NkL8C2eZvKYlo2C</span>
+      </div>
+    </div>
+  </div>
+
+  <main class="page" id="mainPage">
+
+    <!-- Left: Invoice summary -->
+    <section class="invoice-summary">
+      <div class="invoice-header">
+        <div>
+          <h2>Invoice</h2>
+          <div class="inv-number">INV-0042</div>
+        </div>
+        <div class="amount-due">
+          <div class="amount-due__label">Amount Due</div>
+          <div class="amount-due__value"><span class="amount-due__currency">$</span>3,750.00</div>
+        </div>
+      </div>
+
+      <div class="parties">
+        <div>
+          <div class="party__label">From</div>
+          <div class="party__name">Acme Creative Studio</div>
+          <div class="party__detail">hello@acmecreative.co<br>San Francisco, CA</div>
+        </div>
+        <div>
+          <div class="party__label">Bill To</div>
+          <div class="party__name">Maple & Co. Retail</div>
+          <div class="party__detail">Jessica Park<br>jessica@mapleandco.com</div>
+        </div>
+      </div>
+
+      <div class="dates-row">
+        <div class="date-item">
+          <div class="date-item__label">Issued</div>
+          <div class="date-item__value">Mar 15, 2026</div>
+        </div>
+        <div class="date-item">
+          <div class="date-item__label">Due</div>
+          <div class="date-item__value date-item__value--overdue" id="dueDate">Apr 14, 2026</div>
+        </div>
+        <div class="date-item">
+          <div class="date-item__label">Terms</div>
+          <div class="date-item__value">Net 30</div>
+        </div>
+      </div>
+
+      <div class="line-items">
+        <div class="line-items__header">
+          <div>Description</div>
+          <div class="col-num">Qty</div>
+          <div class="col-num">Price</div>
+          <div class="col-num">Total</div>
+        </div>
+
+        <div class="line-item">
+          <div>
+            <div class="li-name">Brand Identity Package</div>
+            <div class="li-desc">Logo, color palette, typography system, brand guidelines PDF</div>
+          </div>
+          <div class="li-qty">1</div>
+          <div class="li-price">$2,400.00</div>
+          <div class="li-total">$2,400.00</div>
+        </div>
+
+        <div class="line-item">
+          <div>
+            <div class="li-name">Social Media Template Pack</div>
+            <div class="li-desc">12 Figma templates (Instagram, LinkedIn, Twitter)</div>
+          </div>
+          <div class="li-qty">1</div>
+          <div class="li-price">$800.00</div>
+          <div class="li-total">$800.00</div>
+        </div>
+
+        <div class="line-item">
+          <div>
+            <div class="li-name">Revision Rounds</div>
+            <div class="li-desc">3 additional revision rounds beyond standard 2</div>
+          </div>
+          <div class="li-qty">3</div>
+          <div class="li-price">$150.00</div>
+          <div class="li-total">$450.00</div>
+        </div>
+
+        <div class="line-item">
+          <div>
+            <div class="li-name">Rush Fee</div>
+            <div class="li-desc">Expedited 10-day turnaround (standard: 21 days)</div>
+          </div>
+          <div class="li-qty">1</div>
+          <div class="li-price">$300.00</div>
+          <div class="li-total">$300.00</div>
+        </div>
+      </div>
+
+      <div class="totals">
+        <div class="totals-row">
+          <span>Subtotal</span>
+          <span class="mono">$3,950.00</span>
+        </div>
+        <div class="totals-row">
+          <span>Discount (5%)</span>
+          <span class="mono" style="color:var(--color-success-600);">−$197.50</span>
+        </div>
+        <div class="totals-row">
+          <span>Tax (0%)</span>
+          <span class="mono">$0.00</span>
+        </div>
+        <div class="totals-row total-due">
+          <span>Total Due</span>
+          <span class="mono">$3,750.00</span>
+        </div>
+      </div>
+
+      <div class="invoice-note">
+        <strong>Notes:</strong> Payment is due within 30 days of invoice date. Late payments are subject to a 1.5% monthly fee.
+        Please reference invoice number INV-0042 in your payment. Thank you for your business!
+      </div>
+    </section>
+
+    <!-- Right: Payment panel -->
+    <section class="payment-panel" id="paymentPanel">
+
+      <!-- Active payment form -->
+      <div id="paymentForm">
+        <div class="payment-panel__header">
+          <h3>Pay $3,750.00</h3>
+          <p>Choose your payment method below</p>
+        </div>
+        <div class="payment-panel__body">
+
+          <div class="pay-method-tabs">
+            <button class="pay-tab active" onclick="switchMethod('card', this)">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+              </svg>
+              Card
+            </button>
+            <button class="pay-tab" onclick="switchMethod('bank', this)">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/>
+                <line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/>
+                <line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/>
+              </svg>
+              Bank (ACH)
+            </button>
+          </div>
+
+          <!-- Card form -->
+          <div class="card-panel" id="cardPanel">
+            <div class="field">
+              <label>Cardholder Name</label>
+              <input type="text" placeholder="Jessica Park" />
+            </div>
+            <div class="field">
+              <label>Card Number</label>
+              <div class="card-input-wrap">
+                <input type="text" placeholder="1234 5678 9012 3456" maxlength="19"
+                  oninput="formatCard(this)" />
+                <div class="card-icons">
+                  <div class="card-icon visa">VISA</div>
+                  <div class="card-icon mc">MC</div>
+                </div>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Expiry</label>
+                <input type="text" placeholder="MM / YY" maxlength="7" oninput="formatExpiry(this)" />
+              </div>
+              <div class="field">
+                <label>CVC</label>
+                <input type="text" placeholder="•••" maxlength="4" />
+              </div>
+            </div>
+            <div class="field">
+              <label>Billing ZIP</label>
+              <input type="text" placeholder="94107" maxlength="10" />
+            </div>
+          </div>
+
+          <!-- Bank/ACH form -->
+          <div class="bank-panel" id="bankPanel">
+            <div class="bank-info-box">
+              <strong>ACH Bank Transfer</strong><br>
+              Payments typically settle within 3–5 business days.
+              Your bank details are encrypted and never stored.
+            </div>
+            <div class="field">
+              <label>Account Holder Name</label>
+              <input type="text" placeholder="Jessica Park" />
+            </div>
+            <div class="field">
+              <label>Routing Number</label>
+              <input type="text" placeholder="021000021" maxlength="9" />
+            </div>
+            <div class="field">
+              <label>Account Number</label>
+              <input type="text" placeholder="•••••••••••" />
+            </div>
+            <div class="field">
+              <label>Account Type</label>
+              <select>
+                <option>Checking</option>
+                <option>Savings</option>
+                <option>Business Checking</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="pay-btn" onclick="simulatePay()">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+            </svg>
+            <span id="payBtnLabel">Pay $3,750.00</span>
+          </button>
+
+          <div class="stripe-badge">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            Secured by <span class="stripe-logo">&nbsp;stripe</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Success state -->
+      <div class="paid-overlay" id="successOverlay">
+        <div class="paid-check">✅</div>
+        <h3>Payment Successful!</h3>
+        <p>Your payment of <strong>$3,750.00</strong> has been received. A receipt has been sent to jessica@mapleandco.com.</p>
+        <div class="paid-ref">Ref: pi_3NkL8C2eZvKYlo2C0001</div>
+        <button class="download-btn" onclick="alert('Receipt PDF download — would trigger in production')">
+          ↓ Download Receipt
+        </button>
+      </div>
+
+    </section>
+  </main>
+
+  <footer class="footer">
+    Questions about this invoice?
+    <a href="mailto:hello@acmecreative.co">hello@acmecreative.co</a>
+    &nbsp;·&nbsp; Powered by <strong>Zephyr</strong>
+    &nbsp;·&nbsp; <a href="#">Privacy Policy</a>
+  </footer>
+
+  <!-- Prototype state switcher -->
+  <div class="proto-switcher">
+    <strong>Prototype States</strong>
+    <button class="active" onclick="setState('unpaid', this)">Unpaid (default)</button>
+    <button onclick="setState('overdue', this)">Overdue</button>
+    <button onclick="setState('paid', this)">Already Paid</button>
+    <button onclick="setState('success', this)">Success (post-pay)</button>
+  </div>
+
+  <script>
+    function switchMethod(method, btn) {
+      document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      const card = document.getElementById('cardPanel');
+      const bank = document.getElementById('bankPanel');
+      const label = document.getElementById('payBtnLabel');
+      if (method === 'card') {
+        card.classList.remove('hidden');
+        bank.classList.remove('visible');
+        bank.style.display = 'none';
+        card.style.display = 'block';
+        label.textContent = 'Pay $3,750.00';
+      } else {
+        card.style.display = 'none';
+        bank.style.display = 'block';
+        label.textContent = 'Authorize ACH Transfer';
+      }
+    }
+
+    function formatCard(input) {
+      let v = input.value.replace(/\D/g, '').substring(0, 16);
+      input.value = v.replace(/(.{4})/g, '$1 ').trim();
+    }
+
+    function formatExpiry(input) {
+      let v = input.value.replace(/\D/g, '');
+      if (v.length >= 2) v = v.substring(0,2) + ' / ' + v.substring(2,4);
+      input.value = v;
+    }
+
+    function simulatePay() {
+      const btn = document.querySelector('.pay-btn');
+      btn.innerHTML = '⏳ Processing…';
+      btn.style.opacity = '0.7';
+      btn.disabled = true;
+      setTimeout(() => {
+        document.getElementById('paymentForm').style.display = 'none';
+        document.getElementById('successOverlay').classList.add('visible');
+      }, 1800);
+    }
+
+    function setState(state, btn) {
+      // Reset all
+      document.querySelectorAll('.proto-switcher button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('alreadyPaidBanner').classList.remove('visible');
+      document.getElementById('paymentForm').style.display = '';
+      document.getElementById('successOverlay').classList.remove('visible');
+      const payBtn = document.querySelector('.pay-btn');
+      if (payBtn) { payBtn.innerHTML = '<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span id="payBtnLabel">Pay $3,750.00</span>'; payBtn.style.opacity = '1'; payBtn.disabled = false; }
+      const dueDate = document.getElementById('dueDate');
+
+      if (state === 'unpaid') {
+        dueDate.textContent = 'Apr 14, 2026';
+        dueDate.classList.remove('date-item__value--overdue');
+      } else if (state === 'overdue') {
+        dueDate.textContent = 'Mar 28, 2026 (Overdue)';
+        dueDate.classList.add('date-item__value--overdue');
+      } else if (state === 'paid') {
+        document.getElementById('alreadyPaidBanner').classList.add('visible');
+        document.getElementById('paymentForm').style.display = 'none';
+        document.getElementById('successOverlay').classList.add('visible');
+        document.querySelector('.paid-check').textContent = '✅';
+        document.querySelector('#successOverlay h3').textContent = 'Invoice Already Paid';
+        document.querySelector('#successOverlay p').textContent = 'This invoice was paid on March 28, 2026. A receipt was sent to jessica@mapleandco.com.';
+      } else if (state === 'success') {
+        simulatePay();
+      }
+    }
+  </script>
+</body>
+</html>
